@@ -27,5 +27,6 @@ def login_page():
     # Set authentication state
     if st.session_state.get("authenticated"):
         st.write(f"Hello, {st.session_state['username']}! You're logged in.")
+        st.experimental_rerun()
     else:
         st.write("Please log in to continue.")
