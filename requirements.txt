@@ -2,4 +2,3 @@ streamlit
 st_login_form
 supabase
 requests
-webrtc_streamer
