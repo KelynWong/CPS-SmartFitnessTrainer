@@ -26,6 +26,6 @@ client = login_form(
 
 # Set authentication state
 if st.session_state.get("authenticated"):
-    st.switch_page("Smart Fitness Trainer - Workout Dashboard")
+    st.switch_page("Workout Dashboard")
 
 st.write("Please log in to continue.")
