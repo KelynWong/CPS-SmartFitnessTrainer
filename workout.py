@@ -13,13 +13,21 @@ def workout_page():
     workout_response = supabase_client.table('workouts').select('*').execute()
     if workout_response.data:
         workouts = [workout['name'] for workout in workout_response.data]
+
+    # Use st.columns to arrange components side by side
+    col1, col2, col3 = st.columns([2, 2, 1])  # Adjust column width ratios as needed
+
+    with col1:
         selected_workout = st.selectbox("Select a Workout", workouts)
 
-    # Input box for Raspberry Pi IP address
-    ip_address = st.text_input("Enter Raspberry Pi IP Address")
+    with col2:
+        ip_address = st.text_input("Enter Raspberry Pi IP Address")
 
-    # Button to start the workout
-    if st.button("Start Workout", disabled=not ip_address):
+    with col3:
+        st.button("Start Workout", disabled=not ip_address)
+
+    # Button click logic
+    if ip_address and st.session_state.get('Start Workout'):
         try:
             # Attempt to connect to the Raspberry Pi's API server
             raspberry_pi_url = f"http://{ip_address}:5000/start_workout"
@@ -33,3 +41,4 @@ def workout_page():
         
         except requests.exceptions.RequestException as e:
             st.error(f"Failed to connect: {e}")
+
