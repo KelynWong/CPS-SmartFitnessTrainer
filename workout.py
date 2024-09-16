@@ -71,5 +71,16 @@ def workout_page():
         workout_count = df.groupby('workout_date').size().reset_index(name='Workout Count')
         fig_workout_freq = px.bar(workout_count, x='workout_date', y='Workout Count', title='Workout Frequency Over Time')
         st.plotly_chart(fig_workout_freq)
+
+        # Average reps per workout
+        avg_reps_per_workout = df.groupby('workout')['reps'].mean().reset_index()
+        fig_avg_reps = px.bar(avg_reps_per_workout, x='workout', y='reps', title='Average Reps per Workout')
+        st.plotly_chart(fig_avg_reps)
+
+        # Duration of workouts
+        df['duration'] = (df['endDT'] - df['startDT']).astype('timedelta64[m]')
+        fig_duration = px.bar(df, x='workout', y='duration', title='Duration of Workouts', text='duration')
+        fig_duration.update_traces(texttemplate='%{text:.2f} min', textposition='outside')
+        st.plotly_chart(fig_duration)
     else:
         st.warning("No workout data found for the current user.")
