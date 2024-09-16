@@ -27,5 +27,5 @@ client = login_form(
 # Set authentication state
 if st.session_state.get("authenticated"):
     st.write(f"Hello, {st.session_state['username']}! You're logged in.")
-
-st.write("Please log in to continue.")
+else:
+    st.write("Please log in to continue.")
