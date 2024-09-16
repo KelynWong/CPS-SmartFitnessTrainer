@@ -78,7 +78,7 @@ def workout_page():
         st.plotly_chart(fig_avg_reps)
 
         # Duration of workouts
-        df['duration'] = (df['endDT'] - df['startDT']).astype('timedelta64[m]')
+        df['duration'] = (df['endDT'] - df['startDT']).dt.total_seconds() / 60  # Convert duration to minutes
         fig_duration = px.bar(df, x='workout', y='duration', title='Duration of Workouts', text='duration')
         fig_duration.update_traces(texttemplate='%{text:.2f} min', textposition='outside')
         st.plotly_chart(fig_duration)
