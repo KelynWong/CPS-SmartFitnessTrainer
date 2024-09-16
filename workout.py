@@ -1,6 +1,8 @@
 import streamlit as st
 import supabase
 import requests
+import pandas as pd
+import plotly.express as px
 # from streamlit_webrtc import webrtc_streamer
 
 def workout_page():
@@ -44,3 +46,30 @@ def workout_page():
         except requests.exceptions.RequestException as e:
             st.error(f"Failed to connect: {e}")
 
+    # Fetch user workout data from 'userWorkouts' table where username matches session state
+    username = st.session_state['username']
+    user_workout_response = supabase_client.table('userWorkouts').select('*').eq('username', username).execute()
+
+    if user_workout_response.data:
+        # Convert the data into a pandas DataFrame for easier analysis and visualization
+        df = pd.DataFrame(user_workout_response.data)
+
+        # Display the data as a table
+        st.subheader(f"Workout Data for {username}")
+        st.dataframe(df)
+
+        # Convert startDT and endDT columns to datetime format for plotting
+        df['startDT'] = pd.to_datetime(df['startDT'])
+        df['endDT'] = pd.to_datetime(df['endDT'])
+
+        # Calculate total reps over time
+        fig_reps = px.line(df, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
+        st.plotly_chart(fig_reps)
+
+        # Workout frequency analysis (count of workouts over time)
+        df['workout_date'] = df['startDT'].dt.date
+        workout_count = df.groupby('workout_date').size().reset_index(name='Workout Count')
+        fig_workout_freq = px.bar(workout_count, x='workout_date', y='Workout Count', title='Workout Frequency Over Time')
+        st.plotly_chart(fig_workout_freq)
+    else:
+        st.warning("No workout data found for the current user.")
