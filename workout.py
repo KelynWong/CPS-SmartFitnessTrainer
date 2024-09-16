@@ -24,6 +24,8 @@ def workout_page():
         ip_address = st.text_input("Enter Raspberry Pi IP Address")
 
     with col3:
+        st.write("")  # Adding some empty lines to align better
+        st.write("")
         st.button("Start Workout", disabled=not ip_address)
 
     # Button click logic
