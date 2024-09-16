@@ -1,17 +1,13 @@
 import streamlit as st
+from login import login_page  # Import the function from login.py
+from workout import workout_page  # Import the function from workout.py
 
-# Define your pages
-login_page = st.Page("login.py", title="Login", icon=":material/login:")
-workout_page = st.Page("workout.py", title="Workout Dashboard", icon=":material/fitness_center:")
+# Ensure session state key initialization
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-# Navigation for the app
+# Navigation logic
 if st.session_state.get("authenticated"):
-    # If the user is authenticated, make both login and workout pages available
-    pg = st.navigation([workout_page])
+    workout_page()  # If authenticated, show workout page
 else:
-    # If the user is not authenticated, only the login page is available
-    pg = st.navigation([login_page], position="hidden")
-
-st.set_page_config(page_title="Smart Fitness Trainer", page_icon=":material/sports:")
-
-pg.run()
+    login_page()  # If not authenticated, show login page
