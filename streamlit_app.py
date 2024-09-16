@@ -6,9 +6,11 @@ workout_page = st.Page("workout.py", title="Workout Dashboard", icon=":material/
 
 # Navigation for the app
 if "authenticated" in st.session_state and st.session_state.authenticated:
-    pg = st.navigation([login_page, workout_page])
+    # If the user is authenticated, make both login and workout pages available
+    pg = st.navigation([login_page, workout_page], position="hidden")
 else:
-    pg = st.navigation([login_page])
+    # If the user is not authenticated, only the login page is available
+    pg = st.navigation([login_page], position="hidden")
 
 st.set_page_config(page_title="Smart Fitness Trainer", page_icon=":material/sports:")
 
