@@ -5,6 +5,9 @@ import pandas as pd
 import plotly.express as px
 # from streamlit_webrtc import webrtc_streamer
 
+# Set the page layout to wide
+st.set_page_config(layout="wide")
+
 def workout_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
