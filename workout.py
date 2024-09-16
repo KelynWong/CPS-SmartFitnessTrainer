@@ -1,7 +1,7 @@
 import streamlit as st
 import supabase
 import requests
-from streamlit_webrtc import webrtc_streamer
+# from streamlit_webrtc import webrtc_streamer
 
 def workout_page():
     # Initialize Supabase client
@@ -29,7 +29,7 @@ def workout_page():
             st.success("Connected to Raspberry Pi!")
             
             # Display the video stream from Raspberry Pi
-            webrtc_streamer(key="raspberry-pi-stream", video_processor_factory=None, video_source=f"http://{ip_address}:5000/video_feed")
+            # webrtc_streamer(key="raspberry-pi-stream", video_processor_factory=None, video_source=f"http://{ip_address}:5000/video_feed")
         
         except requests.exceptions.RequestException as e:
             st.error(f"Failed to connect: {e}")
