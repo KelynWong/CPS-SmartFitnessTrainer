@@ -2,3 +2,5 @@ streamlit
 st_login_form
 supabase
 requests
+pandas
+plotly
