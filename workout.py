@@ -33,31 +33,7 @@ def workout_page():
     if ip_address and start_button:
         try:
             video_url = f"http://{ip_address}:5000/video_feed"
-
-            # Create an empty placeholder for the video feed
-            stframe = st.empty()
-
-            # Stream the video feed from the Flask app
-            cap = cv2.VideoCapture(video_url)
-
-            if not cap.isOpened():
-                st.error(f"Unable to open video stream from {ip_address}. Please check the IP address.")
-            else:
-                # Display video frames in real-time
-                while True:
-                    ret, frame = cap.read()
-                    if not ret:
-                        st.error("Failed to retrieve frame from the video stream.")
-                        break
-                    
-                    # Convert the frame to RGB (OpenCV uses BGR by default)
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    
-                    # Display the frame in Streamlit app
-                    stframe.image(frame, channels="RGB")
-
-                cap.release()
-
+            st.video(video_url)
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
