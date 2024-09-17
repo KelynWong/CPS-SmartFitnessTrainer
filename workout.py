@@ -10,33 +10,28 @@ from PIL import Image
 import io
 import threading
 
-def receive_video_stream(ip_address, port, image_placeholder):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def receive_video_frame(client_socket):
     try:
-        client_socket.connect((ip_address, port))
+        frame_size = int.from_bytes(client_socket.recv(4), byteorder='big')
         
-        while True:
-            frame_size = int.from_bytes(client_socket.recv(4), byteorder='big')
-            
-            img_bytes = b''
-            while len(img_bytes) < frame_size:
-                chunk = client_socket.recv(frame_size - len(img_bytes))
-                if not chunk:
-                    break
-                img_bytes += chunk
+        img_bytes = b''
+        while len(img_bytes) < frame_size:
+            chunk = client_socket.recv(frame_size - len(img_bytes))
+            if not chunk:
+                return None
+            img_bytes += chunk
 
-            nparr = np.frombuffer(img_bytes, np.uint8)
-            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
-            # Convert BGR to RGB
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = Image.fromarray(frame_rgb)
-            
-            image_placeholder.image(image, channels="RGB", use_column_width=True)
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # Convert BGR to RGB
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(frame_rgb)
+        
+        return image
     except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-    finally:
-        client_socket.close()
+        st.error(f"An error occurred while receiving video frame: {str(e)}")
+        return None
 
 def workout_page():
     # Initialize Supabase client
@@ -63,18 +58,33 @@ def workout_page():
         st.write(" ")
         start_button = st.button("Start Workout", disabled=not ip_address)
 
+    # Create a placeholder for the video feed
+    video_placeholder = st.empty()
+
     # Button click logic
     if ip_address and start_button:
         try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((ip_address, 12345))
+            
             st.write("Video Feed:")
-            image_placeholder = st.empty()
             
-            # Start video streaming in a separate thread
-            video_thread = threading.Thread(target=receive_video_stream, args=(ip_address, 12345, image_placeholder))
-            video_thread.start()
+            # Use st.empty() to create a container that we can update
+            image_container = st.empty()
             
-            # You may want to store the thread object in session_state to manage its lifecycle
-            st.session_state['video_thread'] = video_thread
+            while True:
+                image = receive_video_frame(client_socket)
+                if image is None:
+                    break
+                
+                image_container.image(image, channels="RGB", use_column_width=True)
+
+                # Check if the user wants to stop the stream
+                if st.button("Stop Workout"):
+                    break
+            
+            client_socket.close()
+            st.write("Video stream ended.")
             
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
