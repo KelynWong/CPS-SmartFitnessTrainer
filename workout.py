@@ -1,6 +1,5 @@
 import streamlit as st
 import supabase
-import requests
 import pandas as pd
 import plotly.express as px
 
@@ -32,12 +31,34 @@ def workout_page():
     # Button click logic
     if ip_address and st.session_state.get('Start Workout'):
         try:
-            raspberry_pi_url = f"http://{ip_address}:5000/start_workout"
-            response = requests.get(raspberry_pi_url)
-            response.raise_for_status()
-            st.success("Connected to Raspberry Pi!")
-        except requests.exceptions.RequestException as e:
-            st.error(f"Failed to connect: {e}")
+            video_url = f"http://{ip_address}:5000/video_feed"
+
+            # Create an empty placeholder for the video feed
+            stframe = st.empty()
+
+            # Stream the video feed from the Flask app
+            cap = cv2.VideoCapture(video_url)
+
+            if not cap.isOpened():
+                st.error(f"Unable to open video stream from {ip_address}. Please check the IP address.")
+            else:
+                # Display video frames in real-time
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        st.error("Failed to retrieve frame from the video stream.")
+                        break
+                    
+                    # Convert the frame to RGB (OpenCV uses BGR by default)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    
+                    # Display the frame in Streamlit app
+                    stframe.image(frame, channels="RGB")
+
+                cap.release()
+
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 
     # Fetch user workout data from 'userWorkouts' table where username matches session state
     username = st.session_state['username']
