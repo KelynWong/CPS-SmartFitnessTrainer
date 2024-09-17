@@ -4,3 +4,4 @@ supabase
 pandas
 plotly
 opencv-python
+opencv-python-headless
