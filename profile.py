@@ -5,7 +5,7 @@ def profile_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([4,1])
     with col1:
         st.title("Profile Page")
 
