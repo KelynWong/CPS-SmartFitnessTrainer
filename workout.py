@@ -37,7 +37,14 @@ def workout_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
-    st.title("Smart Fitness Trainer - Workout Dashboard")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.title("Smart Fitness Trainer - Workout Dashboard")
+
+    with col2:
+        # Add a button to navigate to the profile page
+        if st.button("Go to Profile Page"):
+            st.session_state['current_page'] = 'profile'
 
     # Fetch workouts from Supabase
     workout_response = supabase_client.table('workouts').select('*').execute()
@@ -110,6 +117,7 @@ def workout_page():
         df['startDT'] = pd.to_datetime(df['startDT'])
         df['endDT'] = pd.to_datetime(df['endDT'])
 
+        st.subheader(f"Workout Analysis")
         # First Row: Total Reps Over Time and Workout Frequency
         col1, col2 = st.columns(2)
         with col1:
