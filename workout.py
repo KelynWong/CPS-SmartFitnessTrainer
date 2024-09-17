@@ -3,6 +3,7 @@ import supabase
 import pandas as pd
 import plotly.express as px
 import cv2
+import requests
 
 def workout_page():
     # Initialize Supabase client
@@ -33,31 +34,24 @@ def workout_page():
     if ip_address and start_button:
         try:
             video_url = f"http://{ip_address}:5000/video_feed"
-
-            # Create an empty placeholder for the video feed
             stframe = st.empty()
 
-            # Stream the video feed from the Flask app
-            cap = cv2.VideoCapture(video_url)
-
-            if not cap.isOpened():
-                st.error(f"Unable to open video stream from {ip_address}. Please check the IP address.")
-            else:
-                # Display video frames in real-time
-                while True:
-                    ret, frame = cap.read()
-                    if not ret:
-                        st.error("Failed to retrieve frame from the video stream.")
-                        break
-                    
-                    # Convert the frame to RGB (OpenCV uses BGR by default)
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    
-                    # Display the frame in Streamlit app
-                    stframe.image(frame, channels="RGB")
-
-                cap.release()
-
+            # Fetch the video stream as raw bytes
+            with requests.get(video_url, stream=True) as r:
+                if r.status_code == 200:
+                    bytes_data = b''
+                    for chunk in r.iter_content(chunk_size=1024):
+                        bytes_data += chunk
+                        a = bytes_data.find(b'\xff\xd8')
+                        b = bytes_data.find(b'\xff\xd9')
+                        if a != -1 and b != -1:
+                            jpg = bytes_data[a:b+2]
+                            bytes_data = bytes_data[b+2:]
+                            frame = np.frombuffer(jpg, dtype=np.uint8)
+                            frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
+                            stframe.image(frame, channels="BGR")
+                else:
+                    st.error(f"Failed to get video stream: {r.status_code}")
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
