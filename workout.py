@@ -2,6 +2,11 @@ import streamlit as st
 import supabase
 import pandas as pd
 import plotly.express as px
+import requests
+import cv2
+import numpy as np
+from PIL import Image
+import io
 
 def workout_page():
     # Initialize Supabase client
@@ -33,9 +38,41 @@ def workout_page():
         try:
             video_url = f"http://{ip_address}:5000/video_feed"
             st.write("Video Feed:")
-            st.markdown(f'<iframe src="{video_url}" width="640" height="480"></iframe>', unsafe_allow_html=True)
+            
+            # Create a placeholder for the image
+            image_placeholder = st.empty()
+            
+            # Function to get the latest frame from the video feed
+            def get_frame():
+                response = requests.get(video_url, stream=True)
+                bytes_data = bytes()
+                for chunk in response.iter_content(chunk_size=1024):
+                    bytes_data += chunk
+                    a = bytes_data.find(b'\xff\xd8')
+                    b = bytes_data.find(b'\xff\xd9')
+                    if a != -1 and b != -1:
+                        jpg = bytes_data[a:b+2]
+                        bytes_data = bytes_data[b+2:]
+                        return jpg
+                return None
+
+            # Continuously update the image
+            while True:
+                frame = get_frame()
+                if frame is not None:
+                    image = Image.open(io.BytesIO(frame))
+                    image_placeholder.image(image, channels="RGB", use_column_width=True)
+                else:
+                    st.error("Failed to get video frame")
+                    break
+
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"An error occurred: {str(e)}")
+            st.error("Please check the following:")
+            st.error("1. Is the Raspberry Pi powered on and connected to the network?")
+            st.error("2. Is the Flask server running on the Raspberry Pi?")
+            st.error("3. Is port 5000 open on the Raspberry Pi's firewall?")
+            st.error("4. Are both devices on the same network?")
 
     # Fetch user workout data from 'userWorkouts' table where username matches session state
     username = st.session_state['username']
