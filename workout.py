@@ -46,6 +46,7 @@ def workout_page():
         profile_button = st.button("Go to profile")
         if profile_button:
             st.session_state['current_page'] = 'profile'
+            st.rerun()
 
     # Fetch workouts from Supabase
     workout_response = supabase_client.table('workouts').select('*').execute()

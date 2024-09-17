@@ -5,7 +5,15 @@ def profile_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
-    st.title("Profile Page")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.title("Profile Page")
+
+    with col2:
+        # Add a button to navigate back to the workout page
+        if st.button("Go to Workout Page"):
+            st.session_state['current_page'] = 'workout'
+            st.rerun()
 
     # Get the logged-in user's username from session state
     username = st.session_state['username']
@@ -42,7 +50,3 @@ def profile_page():
 
     else:
         st.error("User data not found.")
-
-    # Add a button to navigate back to the workout page
-    if st.button("Go to Workout Page"):
-        st.session_state['current_page'] = 'workout'
