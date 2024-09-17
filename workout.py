@@ -2,6 +2,7 @@ import streamlit as st
 import supabase
 import pandas as pd
 import plotly.express as px
+import cv2
 
 def workout_page():
     # Initialize Supabase client
