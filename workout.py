@@ -26,10 +26,10 @@ def workout_page():
     with col3:
         st.write(" ")
         st.write(" ")
-        st.button("Start Workout", disabled=not ip_address)
+        start_button = st.button("Start Workout", disabled=not ip_address)
 
     # Button click logic
-    if ip_address and st.session_state.get('Start Workout'):
+    if ip_address and start_button:
         try:
             video_url = f"http://{ip_address}:5000/video_feed"
 
