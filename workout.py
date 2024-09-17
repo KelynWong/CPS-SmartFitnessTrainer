@@ -2,7 +2,7 @@ import streamlit as st
 import supabase
 import pandas as pd
 import plotly.express as px
-import cv2
+import streamlit.components.v1 as components
 
 def workout_page():
     # Initialize Supabase client
@@ -33,7 +33,15 @@ def workout_page():
     if ip_address and start_button:
         try:
             video_url = f"http://{ip_address}:5000/video_feed"
-            st.video(video_url)
+            # Use a custom HTML component to display the video
+            components.html(
+                f"""
+                <div style="display: flex; justify-content: center;">
+                    <img src="{video_url}" style="max-width: 100%; height: auto;" />
+                </div>
+                """,
+                height=480,
+            )
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
