@@ -43,7 +43,8 @@ def workout_page():
 
     with col2:
         # Add a button to navigate to the profile page
-        if st.button("Go to Profile Page"):
+        profile_button = st.button("Go to profile")
+        if profile_button:
             st.session_state['current_page'] = 'profile'
 
     # Fetch workouts from Supabase
