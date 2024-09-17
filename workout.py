@@ -3,10 +3,40 @@ import supabase
 import pandas as pd
 import plotly.express as px
 import requests
+import socket
 import cv2
 import numpy as np
 from PIL import Image
 import io
+import threading
+
+def receive_video_stream(ip_address, port, image_placeholder):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        client_socket.connect((ip_address, port))
+        
+        while True:
+            frame_size = int.from_bytes(client_socket.recv(4), byteorder='big')
+            
+            img_bytes = b''
+            while len(img_bytes) < frame_size:
+                chunk = client_socket.recv(frame_size - len(img_bytes))
+                if not chunk:
+                    break
+                img_bytes += chunk
+
+            nparr = np.frombuffer(img_bytes, np.uint8)
+            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            # Convert BGR to RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(frame_rgb)
+            
+            image_placeholder.image(image, channels="RGB", use_column_width=True)
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+    finally:
+        client_socket.close()
 
 def workout_page():
     # Initialize Supabase client
@@ -36,42 +66,22 @@ def workout_page():
     # Button click logic
     if ip_address and start_button:
         try:
-            video_url = f"http://{ip_address}:5000/video_feed"
             st.write("Video Feed:")
-            
-            # Create a placeholder for the image
             image_placeholder = st.empty()
             
-            # Function to get the latest frame from the video feed
-            def get_frame():
-                response = requests.get(video_url, stream=True)
-                bytes_data = bytes()
-                for chunk in response.iter_content(chunk_size=1024):
-                    bytes_data += chunk
-                    a = bytes_data.find(b'\xff\xd8')
-                    b = bytes_data.find(b'\xff\xd9')
-                    if a != -1 and b != -1:
-                        jpg = bytes_data[a:b+2]
-                        bytes_data = bytes_data[b+2:]
-                        return jpg
-                return None
-
-            # Continuously update the image
-            while True:
-                frame = get_frame()
-                if frame is not None:
-                    image = Image.open(io.BytesIO(frame))
-                    image_placeholder.image(image, channels="RGB", use_column_width=True)
-                else:
-                    st.error("Failed to get video frame")
-                    break
-
+            # Start video streaming in a separate thread
+            video_thread = threading.Thread(target=receive_video_stream, args=(ip_address, 12345, image_placeholder))
+            video_thread.start()
+            
+            # You may want to store the thread object in session_state to manage its lifecycle
+            st.session_state['video_thread'] = video_thread
+            
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
             st.error("Please check the following:")
             st.error("1. Is the Raspberry Pi powered on and connected to the network?")
-            st.error("2. Is the Flask server running on the Raspberry Pi?")
-            st.error("3. Is port 5000 open on the Raspberry Pi's firewall?")
+            st.error("2. Is the socket server running on the Raspberry Pi?")
+            st.error("3. Is port 12345 open on the Raspberry Pi's firewall?")
             st.error("4. Are both devices on the same network?")
 
     # Fetch user workout data from 'userWorkouts' table where username matches session state
@@ -120,3 +130,11 @@ def workout_page():
             st.plotly_chart(fig_duration, use_container_width=True)
     else:
         st.warning("No workout data found for the current user.")
+
+
+def on_change():
+    if 'video_thread' in st.session_state:
+        # Implement a way to stop the thread safely
+        pass
+
+st.session_state.on_change = on_change
