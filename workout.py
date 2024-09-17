@@ -3,7 +3,6 @@ import supabase
 import requests
 import pandas as pd
 import plotly.express as px
-# from streamlit_webrtc import webrtc_streamer
 
 # Set the page layout to wide
 st.set_page_config(layout="wide")
@@ -20,7 +19,7 @@ def workout_page():
         workouts = [workout['name'] for workout in workout_response.data]
 
     # Use st.columns to arrange components side by side
-    col1, col2, col3 = st.columns([2, 2, 1])  # Adjust column width ratios as needed
+    col1, col2, col3 = st.columns([3, 3, 1])
 
     with col1:
         selected_workout = st.selectbox("Select a Workout", workouts)
@@ -29,23 +28,17 @@ def workout_page():
         ip_address = st.text_input("Enter Raspberry Pi IP Address")
 
     with col3:
-        st.write("")  # Adding some empty lines to align better
-        st.write("")
+        st.write(" ")
+        st.write(" ")
         st.button("Start Workout", disabled=not ip_address)
 
     # Button click logic
     if ip_address and st.session_state.get('Start Workout'):
         try:
-            # Attempt to connect to the Raspberry Pi's API server
             raspberry_pi_url = f"http://{ip_address}:5000/start_workout"
             response = requests.get(raspberry_pi_url)
             response.raise_for_status()
-
             st.success("Connected to Raspberry Pi!")
-            
-            # Display the video stream from Raspberry Pi
-            # webrtc_streamer(key="raspberry-pi-stream", video_processor_factory=None, video_source=f"http://{ip_address}:5000/video_feed")
-        
         except requests.exceptions.RequestException as e:
             st.error(f"Failed to connect: {e}")
 
@@ -65,25 +58,33 @@ def workout_page():
         df['startDT'] = pd.to_datetime(df['startDT'])
         df['endDT'] = pd.to_datetime(df['endDT'])
 
-        # Calculate total reps over time
-        fig_reps = px.line(df, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
-        st.plotly_chart(fig_reps)
+        # First Row: Total Reps Over Time and Workout Frequency
+        col1, col2 = st.columns(2)
+        with col1:
+            # Calculate total reps over time
+            fig_reps = px.line(df, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
+            st.plotly_chart(fig_reps, use_container_width=True)
 
-        # Workout frequency analysis (count of workouts over time)
-        df['workout_date'] = df['startDT'].dt.date
-        workout_count = df.groupby('workout_date').size().reset_index(name='Workout Count')
-        fig_workout_freq = px.bar(workout_count, x='workout_date', y='Workout Count', title='Workout Frequency Over Time')
-        st.plotly_chart(fig_workout_freq)
+        with col2:
+            # Workout frequency analysis (count of workouts over time)
+            df['workout_date'] = df['startDT'].dt.date
+            workout_count = df.groupby('workout_date').size().reset_index(name='Workout Count')
+            fig_workout_freq = px.bar(workout_count, x='workout_date', y='Workout Count', title='Workout Frequency Over Time')
+            st.plotly_chart(fig_workout_freq, use_container_width=True)
 
-        # Average reps per workout
-        avg_reps_per_workout = df.groupby('workout')['reps'].mean().reset_index()
-        fig_avg_reps = px.bar(avg_reps_per_workout, x='workout', y='reps', title='Average Reps per Workout')
-        st.plotly_chart(fig_avg_reps)
+        # Second Row: Average Reps per Workout and Duration of Workouts
+        col1, col2 = st.columns(2)
+        with col1:
+            # Average reps per workout
+            avg_reps_per_workout = df.groupby('workout')['reps'].mean().reset_index()
+            fig_avg_reps = px.bar(avg_reps_per_workout, x='workout', y='reps', title='Average Reps per Workout')
+            st.plotly_chart(fig_avg_reps, use_container_width=True)
 
-        # Duration of workouts
-        df['duration'] = (df['endDT'] - df['startDT']).dt.total_seconds() / 60  # Convert duration to minutes
-        fig_duration = px.bar(df, x='workout', y='duration', title='Duration of Workouts', text='duration')
-        fig_duration.update_traces(texttemplate='%{text:.2f} min', textposition='outside')
-        st.plotly_chart(fig_duration)
+        with col2:
+            # Duration of workouts
+            df['duration'] = (df['endDT'] - df['startDT']).dt.total_seconds() / 60  # Convert duration to minutes
+            fig_duration = px.bar(df, x='workout', y='duration', title='Duration of Workouts', text='duration')
+            fig_duration.update_traces(texttemplate='%{text:.2f} min', textposition='outside')
+            st.plotly_chart(fig_duration, use_container_width=True)
     else:
         st.warning("No workout data found for the current user.")
