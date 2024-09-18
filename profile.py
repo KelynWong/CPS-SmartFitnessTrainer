@@ -19,10 +19,14 @@ def profile_page():
     username = st.session_state['username']
 
     # Fetch user details from 'user' table, excluding the password
-    user_response = supabase_client.table('user').select('username, caloriesBurnPerDay, durationPerWorkout, workoutFrequencyPerWeek').eq('username', username).single().execute()
+    user_response = supabase_client.table('user').select('username, caloriesBurnPerDay, durationPerWorkout, workoutFrequencyPerWeek', 'profilePicture').eq('username', username).single().execute()
 
     if user_response.data:
         user_data = user_response.data
+
+        # Display profile picture if available
+        if user_data['profilePicture']:
+            st.image(user_data['profilePicture'], width=150, caption="Profile Picture")
 
         # Profile form with pre-filled values
         with st.form("profile_form"):
@@ -32,11 +36,35 @@ def profile_page():
             duration_workout = st.number_input("Duration per Workout (in minutes)", value=user_data['durationPerWorkout'], min_value=0)
             frequency_workout = st.number_input("Workout Frequency per Week", value=user_data['workoutFrequencyPerWeek'], min_value=0)
 
+            # File uploader for profile picture
+            uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
+
             # Submit button for saving changes
             save_button = st.form_submit_button("Save Changes")
 
         # Save the updated details
         if save_button:
+            # Handle profile picture upload if a file is uploaded
+            if uploaded_file is not None:
+                # Save uploaded file to Supabase storage
+                image_bytes = uploaded_file.read()
+                file_ext = uploaded_file.name.split('.')[-1]
+                file_name = f"profile_{username}.{file_ext}"
+
+                upload_response = supabase_client.storage().from_('profileImages').upload(f"{username}/{file_name}", io.BytesIO(image_bytes))
+
+                if upload_response.status_code == 200:
+                    profile_picture_url = supabase_client.storage().from_('profileImages').get_public_url(f"{username}/{file_name}")
+                    st.success("Profile picture uploaded successfully!")
+
+                    # Update the user table with the profile picture URL
+                    supabase_client.table('user').update({
+                        'profilePicture': profile_picture_url
+                    }).eq('username', username).execute()
+                else:
+                    st.error("Failed to upload profile picture.")
+
+            # Update the rest of the user profile data
             update_response = supabase_client.table('user').update({
                 'caloriesBurnPerDay': calories_burn,
                 'durationPerWorkout': duration_workout,
