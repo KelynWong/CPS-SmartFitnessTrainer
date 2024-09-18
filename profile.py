@@ -63,6 +63,14 @@ def profile_page():
                         file_ext = uploaded_file.name.split('.')[-1]
                         file_name = f"profile_{username}.{file_ext}"
 
+                        public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
+                        st.write(public_url_response)
+                        # Check if the user already has a profile picture, and delete the old one if it exists
+                        if public_url_response.data:
+                            # Extract the file path from the URL (assuming the public URL is like: <bucket>/<username>/<filename>)
+                            old_file_path = user_data['profilePicture'].split(st.secrets["SUPABASE_URL"])[-1]
+                            delete_response = supabase_client.storage.from_('profileImages').remove([old_file_path])
+
                         # Upload the file directly using raw bytes
                         upload_response = supabase_client.storage.from_('profileImages').upload(f"{username}/{file_name}", image_bytes)
                         public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
