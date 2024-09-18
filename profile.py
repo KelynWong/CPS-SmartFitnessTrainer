@@ -66,7 +66,7 @@ def profile_page():
                         # Upload the file directly using raw bytes
                         upload_response = supabase_client.storage.from_('profileImages').upload(f"{username}/{file_name}", image_bytes)
                         public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
-                        profile_picture_url = public_url_response['data']['publicURL']
+                        profile_picture_url = public_url_response.data.publicURL
 
                         # Update the user table with the profile picture URL
                         update_profile_picture_response = supabase_client.table('user').update({
