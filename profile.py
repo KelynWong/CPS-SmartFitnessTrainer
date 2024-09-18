@@ -26,9 +26,8 @@ def profile_page():
         user_data = user_response.data
 
         # Display profile picture if available, otherwise show a placeholder
-        if user_data['profilePicture']:
+        if user_data['profilePicture'] is not None and user_data['profilePicture'].strip() != "":
             st.image(user_data['profilePicture'], width=150, caption="Profile Picture")
-            st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
         else:
             # Use a placeholder image if no profile picture is found
             st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
