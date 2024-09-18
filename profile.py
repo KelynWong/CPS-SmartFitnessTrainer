@@ -35,10 +35,10 @@ def profile_page():
                     # Display profile picture if available, otherwise show a placeholder
                     if user_data['profilePicture']:
                         st.image(user_data['profilePicture'], width=150, caption="Profile Picture", use_column_width='auto')
-                        delete_button = st.button("Delete Picture")
+                        delete_button = st.form_submit_button("Delete Picture")
                     else:
                         st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture", use_column_width='auto')
-                        delete_button = None  # No delete button if no picture
+                        delete_button = False  # No delete button if no picture
 
                 with col2:
                     # File uploader for profile picture
@@ -92,7 +92,7 @@ def profile_page():
                 
                 except Exception as e:
                     st.error(f"An error occurred while updating the profile: {e}")
-            
+
             if delete_button:
                 try:
                     # Remove profile picture from Supabase storage
