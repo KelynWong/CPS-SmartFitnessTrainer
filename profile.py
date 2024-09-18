@@ -68,7 +68,7 @@ def profile_page():
 
                 # Upload the image to Supabase Storage
                 upload_response = supabase_client.storage().from_('profileImages').upload(f"{username}/{file_name}", io.BytesIO(image_bytes))
-
+                st.write(upload_response)  # This will print the response structure
                 # Check for an error in the upload response
                 if upload_response.error is None:
                     # Get the public URL of the uploaded profile picture
