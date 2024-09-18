@@ -44,7 +44,7 @@ def profile_page():
                     # File uploader for profile picture
                     uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
-                col1, col2, col3 = st.columns([2, 1, 1])
+                col1, col2, col3 = st.columns(3)
                 with col1:
                     calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
                 
@@ -64,6 +64,12 @@ def profile_page():
                         image_bytes = uploaded_file.read()  # Read raw bytes from the uploaded file
                         file_ext = uploaded_file.name.split('.')[-1]
                         file_name = f"profile_{username}.{file_ext}"
+
+                        public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
+                        st.write(public_url_response)
+                        # Check if the user already has a profile picture, and delete the old one if it exists
+                        if public_url_response:
+                            delete_response = supabase_client.storage.from_('profileImages').remove(f"{username}/{file_name}")
 
                         # Upload the file directly using raw bytes
                         upload_response = supabase_client.storage.from_('profileImages').upload(f"{username}/{file_name}", image_bytes)
