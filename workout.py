@@ -1,38 +1,29 @@
+from st_socketio import sio, st_socketio
 import streamlit as st
 import supabase
 import pandas as pd
 import plotly.express as px
-import requests
-import socket
-import cv2
-import numpy as np
 from PIL import Image
 import io
-import threading
+import base64
+import numpy as np
+import asyncio
 
-def receive_video_frame(client_socket):
-    try:
-        frame_size = int.from_bytes(client_socket.recv(4), byteorder='big')
-        
-        img_bytes = b''
-        while len(img_bytes) < frame_size:
-            chunk = client_socket.recv(frame_size - len(img_bytes))
-            if not chunk:
-                return None
-            img_bytes += chunk
+# Global variable to store the latest frame
+latest_frame = None
 
-        nparr = np.frombuffer(img_bytes, np.uint8)
-        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
-        # Convert BGR to RGB
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(frame_rgb)
-        
-        return image
-    except Exception as e:
-        st.error(f"An error occurred while receiving video frame: {str(e)}")
-        return None
+@sio.on('video_frame')
+def video_frame_event(sid, data):
+    global latest_frame
+    # Convert base64 string to image
+    img_bytes = base64.b64decode(data)
+    latest_frame = Image.open(io.BytesIO(img_bytes))
 
+def update_image():
+    if 'image_container' in st.session_state and latest_frame is not None:
+        st.session_state.image_container.image(latest_frame, channels="RGB", use_column_width=True)
+
+@st_socketio(path='/ws/')
 def workout_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
@@ -69,39 +60,33 @@ def workout_page():
         start_button = st.button("Start Workout", disabled=not ip_address)
 
     # Create a placeholder for the video feed
-    video_placeholder = st.empty()
+    st.session_state.image_container = st.empty()
 
     # Button click logic
     if ip_address and start_button:
         try:
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.connect((ip_address, 12345))
+            st.write("Attempting to connect to the Raspberry Pi...")
             
-            st.write("Video Feed:")
+            # Use a callback to emit the 'start_stream' event
+            asyncio.run(sio.emit('start_stream', {'ip': ip_address}))
             
-            # Use st.empty() to create a container that we can update
-            image_container = st.empty()
+            st.write("Connected successfully! Starting video feed:")
             
+            # Start updating the image
             while True:
-                image = receive_video_frame(client_socket)
-                if image is None:
-                    break
-                
-                image_container.image(image, channels="RGB", use_column_width=True)
-
-                # Check if the user wants to stop the stream
+                update_image()
                 if st.button("Stop Workout"):
+                    st.write("Stopping workout...")
+                    asyncio.run(sio.emit('stop_stream'))
                     break
-            
-            client_socket.close()
-            st.write("Video stream ended.")
+                st.rerun()
             
         except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+            st.error(f"An unexpected error occurred: {str(e)}")
             st.error("Please check the following:")
             st.error("1. Is the Raspberry Pi powered on and connected to the network?")
             st.error("2. Is the socket server running on the Raspberry Pi?")
-            st.error("3. Is port 12345 open on the Raspberry Pi's firewall?")
+            st.error("3. Is the Raspberry Pi's IP address correct?")
             st.error("4. Are both devices on the same network?")
 
     # Fetch user workout data from 'userWorkouts' table where username matches session state
@@ -152,10 +137,4 @@ def workout_page():
     else:
         st.warning("No workout data found for the current user.")
 
-
-def on_change():
-    if 'video_thread' in st.session_state:
-        # Implement a way to stop the thread safely
-        pass
-
-st.session_state.on_change = on_change
+sio.connect()
