@@ -59,11 +59,12 @@ def profile_page():
                 if uploaded_file is not None:
                     try:
                         # Handle profile picture upload
-                        image_bytes = uploaded_file.read()
+                        image_bytes = uploaded_file.read()  # Read raw bytes from the uploaded file
                         file_ext = uploaded_file.name.split('.')[-1]
                         file_name = f"profile_{username}.{file_ext}"
 
-                        upload_response = supabase_client.storage.from_('profileImages').upload(f"{username}/{file_name}", io.BytesIO(image_bytes))
+                        # Upload the file directly using raw bytes
+                        upload_response = supabase_client.storage.from_('profileImages').upload(f"{username}/{file_name}", image_bytes)
                         public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
                         profile_picture_url = public_url_response['data']['publicURL']
 
