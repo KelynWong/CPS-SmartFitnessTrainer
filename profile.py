@@ -30,13 +30,13 @@ def profile_page():
             with st.form("profile_form"):
                 st.subheader(f"Edit Profile for {user_data['username']}")
                 
-                col1, col2 = st.columns([2, 1])
+                col1, col2 = st.columns([1, 3])
                 with col1:
                     # Display profile picture if available, otherwise show a placeholder
                     if user_data['profilePicture']:
-                        st.image(user_data['profilePicture'], width=150, caption="Profile Picture")
+                        st.image(user_data['profilePicture'], width=150, caption="Profile Picture", use_column_width='auto')
                     else:
-                        st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
+                        st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture", use_column_width='auto')
                 
                 with col2:
                     # File uploader for profile picture
