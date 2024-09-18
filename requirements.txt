@@ -6,4 +6,5 @@ pandas
 plotly
 opencv-python-headless
 pillow
-st_socketio
+python-socketio
+aiohttp
