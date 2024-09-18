@@ -94,6 +94,8 @@ def profile_page():
                 'workoutFrequencyPerWeek': frequency_workout
             }).eq('username', username).execute()
 
+            st.write(upload_response)  # This will print the response structure
+
             # Check for an error in the update response
             if update_response.error is None:
                 st.success("Profile updated successfully!")
