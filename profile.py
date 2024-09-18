@@ -80,7 +80,7 @@ def profile_page():
                         'profilePicture': profile_picture_url
                     }).eq('username', username).execute()
 
-                    if update_response.error is None:
+                    if update_response.get('error') is None:
                         st.success("Profile picture updated successfully!")
                     else:
                         st.error(f"Failed to update profile picture: {update_response.error}")
@@ -97,7 +97,7 @@ def profile_page():
             st.write(upload_response)  # This will print the response structure
 
             # Check for an error in the update response
-            if update_response.error is None:
+            if update_response.get('error') is None:
                 st.success("Profile updated successfully!")
             else:
                 st.error(f"An error occurred while updating the profile: {update_response.error}")
