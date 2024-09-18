@@ -28,6 +28,7 @@ def profile_page():
         # Display profile picture if available, otherwise show a placeholder
         if user_data['profilePicture']:
             st.image(user_data['profilePicture'], width=150, caption="Profile Picture")
+            st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
         else:
             # Use a placeholder image if no profile picture is found
             st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
