@@ -27,10 +27,10 @@ def profile_page():
 
         # Display profile picture if available, otherwise show a placeholder
         if user_data['profilePicture'] is not None and user_data['profilePicture'].strip() != "":
-            st.image(user_data['profilePicture'], width=150, caption="Profile Picture")
+            st.markdown(f"<div style='text-align: center;'><img src='{user_data['profilePicture']}' width='150'></div>", unsafe_allow_html=True)
         else:
             # Use a placeholder image if no profile picture is found
-            st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
+            st.markdown("<div style='text-align: center;'><img src='https://avatar.iran.liara.run/public' width='150' alt='No Profile Picture'></div>", unsafe_allow_html=True)
 
         # Profile form with pre-filled values
         with st.form("profile_form"):
