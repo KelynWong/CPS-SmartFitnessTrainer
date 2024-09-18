@@ -25,23 +25,32 @@ def profile_page():
     if user_response.data:
         user_data = user_response.data
 
-        # Display profile picture if available, otherwise show a placeholder
-        if user_data['profilePicture'] is not None and user_data['profilePicture'].strip() != "":
-            st.markdown(f"<div style='text-align: center;'><img src='{user_data['profilePicture']}' width='150'></div>", unsafe_allow_html=True)
-        else:
-            # Use a placeholder image if no profile picture is found
-            st.markdown("<div style='text-align: center;'><img src='https://avatar.iran.liara.run/public' width='150' alt='No Profile Picture'></div>", unsafe_allow_html=True)
-
         # Profile form with pre-filled values
         with st.form("profile_form"):
             st.subheader(f"Edit Profile for {user_data['username']}")
             
-            calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
-            duration_workout = st.number_input("Duration per Workout (in minutes)", value=user_data['durationPerWorkout'], min_value=0)
-            frequency_workout = st.number_input("Workout Frequency per Week", value=user_data['workoutFrequencyPerWeek'], min_value=0)
+            st.columns([2,3])
+            with col1:
+                # Display profile picture if available, otherwise show a placeholder
+                if user_data['profilePicture'] is not None and user_data['profilePicture'].strip() != "":
+                    st.image(user_data['profilePicture'], width=150, caption="Profile Picture")
+                else:
+                    # Use a placeholder image if no profile picture is found
+                    st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
+            
+            with col2:
+                # File uploader for profile picture
+                uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
-            # File uploader for profile picture
-            uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
+            st.columns(3)
+            with col1:
+                calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
+            
+            with col2:
+                duration_workout = st.number_input("Duration per Workout (in minutes)", value=user_data['durationPerWorkout'], min_value=0)
+            
+            with col3:
+                frequency_workout = st.number_input("Workout Frequency per Week", value=user_data['workoutFrequencyPerWeek'], min_value=0)
 
             # Submit button for saving changes
             save_button = st.form_submit_button("Save Changes")
