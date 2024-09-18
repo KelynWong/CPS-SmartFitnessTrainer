@@ -95,7 +95,7 @@ def profile_page():
             }).eq('username', username).execute()
 
             # Check for an error in the update response
-            if update_response.error is None:
+            if update_response and 'data' in update_response:
                 st.success("Profile updated successfully!")
             else:
                 st.error(f"An error occurred while updating the profile: {update_response.error}")
