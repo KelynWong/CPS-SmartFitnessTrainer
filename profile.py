@@ -23,8 +23,8 @@ def profile_page():
         # Fetch user details from 'user' table
         user_response = supabase_client.table('user').select('username, caloriesBurnPerDay, durationPerWorkout, workoutFrequencyPerWeek, profilePicture').eq('username', username).single().execute()
         
-        if user_response and user_response.get('data'):
-            user_data = user_response['data']
+        if user_response:
+            user_data = user_response.data
 
             # Profile form with pre-filled values
             with st.form("profile_form"):
