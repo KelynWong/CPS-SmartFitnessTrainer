@@ -22,7 +22,7 @@ def profile_page():
     try:
         # Fetch user details from 'user' table
         user_response = supabase_client.table('user').select('username, caloriesBurnPerDay, durationPerWorkout, workoutFrequencyPerWeek, profilePicture').eq('username', username).single().execute()
-        
+
         if user_response:
             user_data = user_response.data
 
@@ -38,7 +38,8 @@ def profile_page():
                         delete_button = st.button("Delete Picture")
                     else:
                         st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture", use_column_width='auto')
-                
+                        delete_button = None  # No delete button if no picture
+
                 with col2:
                     # File uploader for profile picture
                     uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
@@ -64,11 +65,6 @@ def profile_page():
                         file_ext = uploaded_file.name.split('.')[-1]
                         file_name = f"profile_{username}.{file_ext}"
 
-                        public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
-                        # Check if the user already has a profile picture, and delete the old one if it exists
-                        if public_url_response:
-                            delete_response = supabase_client.storage.from_('profileImages').remove(f"{username}/{file_name}")
-
                         # Upload the file directly using raw bytes
                         upload_response = supabase_client.storage.from_('profileImages').upload(f"{username}/{file_name}", image_bytes)
                         public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
@@ -80,7 +76,7 @@ def profile_page():
                         }).eq('username', username).execute()
 
                         st.success("Profile picture updated successfully!")
-  
+
                     except Exception as e:
                         st.error(f"An error occurred during the upload: {e}")
 
@@ -98,10 +94,23 @@ def profile_page():
                     st.error(f"An error occurred while updating the profile: {e}")
             
             if delete_button:
-                st.write(user_data['profilePicture'])
-                delete_response = supabase_client.storage.from_('profileImages').remove(url)
+                try:
+                    # Remove profile picture from Supabase storage
+                    file_name = f"profile_{username}.{user_data['profilePicture'].split('/')[-1].split('.')[0]}.jpg"
+                    delete_response = supabase_client.storage.from_('profileImages').remove(f"{username}/{file_name}")
+
+                    # Remove the profile picture URL from the user table
+                    update_profile_picture_response = supabase_client.table('user').update({
+                        'profilePicture': None
+                    }).eq('username', username).execute()
+
+                    st.success("Profile picture deleted successfully!")
+
+                except Exception as e:
+                    st.error(f"An error occurred during the deletion: {e}")
+
         else:
             st.error("User data not found.")
-    
+
     except Exception as e:
         st.error(f"An error occurred: {e}")
