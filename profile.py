@@ -66,7 +66,6 @@ def profile_page():
                         file_name = f"profile_{username}.{file_ext}"
 
                         public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
-                        st.write(public_url_response)
                         # Check if the user already has a profile picture, and delete the old one if it exists
                         if public_url_response:
                             delete_response = supabase_client.storage.from_('profileImages').remove(f"{username}/{file_name}")
@@ -95,6 +94,7 @@ def profile_page():
                     }).eq('username', username).execute()
 
                     st.success("Profile updated successfully!")
+                    st.rerun()
                 
                 except Exception as e:
                     st.error(f"An error occurred while updating the profile: {e}")
@@ -111,6 +111,7 @@ def profile_page():
                     }).eq('username', username).execute()
 
                     st.success("Profile picture deleted successfully!")
+                    st.rerun()
 
                 except Exception as e:
                     st.error(f"An error occurred during the deletion: {e}")
