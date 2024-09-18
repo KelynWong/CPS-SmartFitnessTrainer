@@ -69,17 +69,23 @@ def profile_page():
                 # Upload the image to Supabase Storage
                 upload_response = supabase_client.storage().from_('profileImages').upload(f"{username}/{file_name}", io.BytesIO(image_bytes))
 
-                if upload_response.status_code == 200:
+                # Check for an error in the upload response
+                if upload_response.error is None:
                     # Get the public URL of the uploaded profile picture
                     profile_picture_url = supabase_client.storage().from_('profileImages').get_public_url(f"{username}/{file_name}")
                     st.success("Profile picture uploaded successfully!")
 
                     # Update the user table with the profile picture URL
-                    supabase_client.table('user').update({
+                    update_response = supabase_client.table('user').update({
                         'profilePicture': profile_picture_url
                     }).eq('username', username).execute()
+
+                    if update_response.error is None:
+                        st.success("Profile picture updated successfully!")
+                    else:
+                        st.error(f"Failed to update profile picture: {update_response.error}")
                 else:
-                    st.error("Failed to upload profile picture.")
+                    st.error(f"Failed to upload profile picture: {upload_response.error}")
 
             # Update the rest of the user profile data
             update_response = supabase_client.table('user').update({
@@ -88,9 +94,11 @@ def profile_page():
                 'workoutFrequencyPerWeek': frequency_workout
             }).eq('username', username).execute()
 
-            if update_response.status_code == 200:
+            # Check for an error in the update response
+            if update_response.error is None:
                 st.success("Profile updated successfully!")
             else:
-                st.error("An error occurred while updating the profile.")
+                st.error(f"An error occurred while updating the profile: {update_response.error}")
+
     else:
         st.error("User data not found.")
