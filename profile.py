@@ -80,6 +80,7 @@ def profile_page():
                         }).eq('username', username).execute()
 
                         st.success("Profile picture URL updated successfully!")
+                        st.rerun()
   
                     except Exception as e:
                         st.error(f"An error occurred during the upload: {e}")
