@@ -1,11 +1,12 @@
 import streamlit as st
 import supabase
+import io
 
 def profile_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
-    col1, col2 = st.columns([4,1])
+    col1, col2 = st.columns([4, 1])
     with col1:
         st.title("Profile Page")
 
@@ -19,14 +20,17 @@ def profile_page():
     username = st.session_state['username']
 
     # Fetch user details from 'user' table, excluding the password
-    user_response = supabase_client.table('user').select('username, caloriesBurnPerDay, durationPerWorkout, workoutFrequencyPerWeek', 'profilePicture').eq('username', username).single().execute()
+    user_response = supabase_client.table('user').select('username, caloriesBurnPerDay, durationPerWorkout, workoutFrequencyPerWeek, profilePicture').eq('username', username).single().execute()
 
     if user_response.data:
         user_data = user_response.data
 
-        # Display profile picture if available
+        # Display profile picture if available, otherwise show a placeholder
         if user_data['profilePicture']:
             st.image(user_data['profilePicture'], width=150, caption="Profile Picture")
+        else:
+            # Use a placeholder image if no profile picture is found
+            st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture")
 
         # Profile form with pre-filled values
         with st.form("profile_form"):
@@ -51,9 +55,11 @@ def profile_page():
                 file_ext = uploaded_file.name.split('.')[-1]
                 file_name = f"profile_{username}.{file_ext}"
 
+                # Upload the image to Supabase Storage
                 upload_response = supabase_client.storage().from_('profileImages').upload(f"{username}/{file_name}", io.BytesIO(image_bytes))
 
                 if upload_response.status_code == 200:
+                    # Get the public URL of the uploaded profile picture
                     profile_picture_url = supabase_client.storage().from_('profileImages').get_public_url(f"{username}/{file_name}")
                     st.success("Profile picture uploaded successfully!")
 
@@ -75,6 +81,5 @@ def profile_page():
                 st.success("Profile updated successfully!")
             else:
                 st.error("An error occurred while updating the profile.")
-
     else:
         st.error("User data not found.")
