@@ -43,6 +43,7 @@ def workout_page():
 
     with col2:
         # Add a button to navigate to the profile page
+        st.write(" ")
         profile_button = st.button("Go to profile")
         if profile_button:
             st.session_state['current_page'] = 'profile'

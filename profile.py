@@ -12,6 +12,7 @@ def profile_page():
 
     with col2:
         # Add a button to navigate back to the workout page
+        st.write(" ")
         if st.button("Go to Workout Page"):
             st.session_state['current_page'] = 'workout'
             st.rerun()
@@ -40,6 +41,7 @@ def profile_page():
             
             with col2:
                 # File uploader for profile picture
+                st.write(" ")
                 uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
             col1, col2, col3 = st.columns(3)
