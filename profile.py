@@ -35,6 +35,7 @@ def profile_page():
                     # Display profile picture if available, otherwise show a placeholder
                     if user_data['profilePicture']:
                         st.image(user_data['profilePicture'], width=150, caption="Profile Picture", use_column_width='auto')
+                        delete_button = st.button("Delete Picture")
                     else:
                         st.image("https://avatar.iran.liara.run/public", width=150, caption="No Profile Picture", use_column_width='auto')
                 
@@ -64,7 +65,6 @@ def profile_page():
                         file_name = f"profile_{username}.{file_ext}"
 
                         public_url_response = supabase_client.storage.from_('profileImages').get_public_url(f"{username}/{file_name}")
-                        st.write(public_url_response)
                         # Check if the user already has a profile picture, and delete the old one if it exists
                         if public_url_response:
                             delete_response = supabase_client.storage.from_('profileImages').remove(f"{username}/{file_name}")
@@ -79,8 +79,7 @@ def profile_page():
                             'profilePicture': profile_picture_url
                         }).eq('username', username).execute()
 
-                        st.success("Profile picture URL updated successfully!")
-                        st.rerun()
+                        st.success("Profile picture updated successfully!")
   
                     except Exception as e:
                         st.error(f"An error occurred during the upload: {e}")
@@ -97,7 +96,10 @@ def profile_page():
                 
                 except Exception as e:
                     st.error(f"An error occurred while updating the profile: {e}")
-        
+            
+            if delete_button:
+                st.write(user_data['profilePicture'])
+                delete_response = supabase_client.storage.from_('profileImages').remove(url)
         else:
             st.error("User data not found.")
     
