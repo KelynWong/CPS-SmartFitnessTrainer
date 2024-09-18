@@ -65,23 +65,16 @@ def profile_page():
 
                         upload_response = supabase_client.storage().from_('profileImages').upload(f"{username}/{file_name}", io.BytesIO(image_bytes))
 
-                        # Check upload response
-                        if upload_response.status_code == 200:
-                            profile_picture_url = supabase_client.storage().from_('profileImages').get_public_url(f"{username}/{file_name}")['data']['publicURL']
-                            st.success("Profile picture uploaded successfully!")
+                        profile_picture_url = supabase_client.storage().from_('profileImages').get_public_url(f"{username}/{file_name}")['data']['publicURL']
+                        st.success("Profile picture uploaded successfully!")
 
-                            # Update the user table with the profile picture URL
-                            update_profile_picture_response = supabase_client.table('user').update({
-                                'profilePicture': profile_picture_url
-                            }).eq('username', username).execute()
+                        # Update the user table with the profile picture URL
+                        update_profile_picture_response = supabase_client.table('user').update({
+                            'profilePicture': profile_picture_url
+                        }).eq('username', username).execute()
 
-                            if update_profile_picture_response.status_code == 200:
-                                st.success("Profile picture URL updated successfully!")
-                            else:
-                                st.error("Failed to update profile picture URL.")
-                        else:
-                            st.error("Failed to upload profile picture.")
-                    
+                        st.success("Profile picture URL updated successfully!")
+  
                     except Exception as e:
                         st.error(f"An error occurred during the upload: {e}")
 
@@ -93,10 +86,7 @@ def profile_page():
                         'workoutFrequencyPerWeek': frequency_workout
                     }).eq('username', username).execute()
 
-                    if update_response.status_code == 200:
-                        st.success("Profile updated successfully!")
-                    else:
-                        st.error("An error occurred while updating the profile.")
+                    st.success("Profile updated successfully!")
                 
                 except Exception as e:
                     st.error(f"An error occurred while updating the profile: {e}")
