@@ -29,7 +29,7 @@ def profile_page():
         with st.form("profile_form"):
             st.subheader(f"Edit Profile for {user_data['username']}")
             
-            st.columns([2,3])
+            col1, col2 = st.columns([2,3])
             with col1:
                 # Display profile picture if available, otherwise show a placeholder
                 if user_data['profilePicture'] is not None and user_data['profilePicture'].strip() != "":
@@ -42,7 +42,7 @@ def profile_page():
                 # File uploader for profile picture
                 uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
-            st.columns(3)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
             
