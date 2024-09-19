@@ -30,7 +30,7 @@ def disconnect(sid):
     print('disconnect ', sid)
 
 def get_sio_asgi_app():
-    return sio.asgi_app
+    return sio.on_asgi()
 
 # This function should be called from your main Streamlit app
 def init_socketio():
