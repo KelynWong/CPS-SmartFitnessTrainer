@@ -2,7 +2,7 @@ import gc
 from typing import Optional, Callable
 from socketio import AsyncServer
 from streamlit.runtime.scriptrunner import add_script_run_ctx
-from streamlit.web.server.websocket_headers import get_websocket_headers
+from streamlit.web.server.websocket_headers import _get_websocket_headers
 
 sio = AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
