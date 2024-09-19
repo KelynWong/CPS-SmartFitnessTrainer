@@ -136,5 +136,3 @@ def workout_page():
             st.plotly_chart(fig_duration, use_container_width=True)
     else:
         st.warning("No workout data found for the current user.")
-
-sio.connect()

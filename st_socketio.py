@@ -22,7 +22,7 @@ def st_socketio(path: str):
 @sio.on('connect')
 async def connect(sid, environ):
     print('connect ', sid)
-    ctx = get_websocket_headers()
+    ctx = _get_websocket_headers()
     add_script_run_ctx(ctx)
 
 @sio.on('disconnect')
