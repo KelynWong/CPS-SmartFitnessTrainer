@@ -9,9 +9,6 @@ import base64
 import numpy as np
 import asyncio
 
-# Initialize Socket.IO
-init_socketio()
-
 # Global variable to store the latest frame
 latest_frame = None
 
