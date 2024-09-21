@@ -1,29 +1,9 @@
-from st_socketio import sio, st_socketio
 import streamlit as st
 import supabase
 import pandas as pd
 import plotly.express as px
-from PIL import Image
-import io
-import base64
-import numpy as np
-import asyncio
+import requests
 
-# Global variable to store the latest frame
-latest_frame = None
-
-@sio.on('video_frame')
-def video_frame_event(sid, data):
-    global latest_frame
-    # Convert base64 string to image
-    img_bytes = base64.b64decode(data)
-    latest_frame = Image.open(io.BytesIO(img_bytes))
-
-def update_image():
-    if 'image_container' in st.session_state and latest_frame is not None:
-        st.session_state.image_container.image(latest_frame, channels="RGB", use_column_width=True)
-
-@st_socketio(path='/ws/')
 def workout_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
@@ -57,37 +37,32 @@ def workout_page():
     with col3:
         st.write(" ")
         st.write(" ")
-        start_button = st.button("Start Workout", disabled=not ip_address)
+        start_button = st.button("Start Workout")
 
-    # Create a placeholder for the video feed
-    st.session_state.image_container = st.empty()
-
-    # Button click logic
-    if ip_address and start_button:
+    # Button click logic to display YouTube URL
+    if start_button and ip_address:
         try:
-            st.write("Attempting to connect to the Raspberry Pi...")
-            
-            # Use a callback to emit the 'start_stream' event
-            asyncio.run(sio.emit('start_stream', {'ip': ip_address}))
-            
-            st.write("Connected successfully! Starting video feed:")
-            
-            # Start updating the image
-            while True:
-                update_image()
-                if st.button("Stop Workout"):
-                    st.write("Stopping workout...")
-                    asyncio.run(sio.emit('stop_stream'))
-                    break
-                st.rerun()
-            
+            # Call the API to start the workout stream
+            st.write("Starting workout...")
+            api_url = f"http://{ip_address}:5000/start"
+            response = requests.post(api_url)
+
+            # Check if the request was successful
+            if response.status_code == 200:
+                result = response.json()
+                watch_url = result.get("watch_url")
+
+                # Display the returned watch_url
+                if watch_url:
+                    st.write("Stream started successfully! Here is your workout video:")
+                    st.write(watch_url)
+                else:
+                    st.error("Failed to retrieve the watch URL from the response.")
+            else:
+                st.error(f"Failed to start the workout stream. Status code: {response.status_code}")
+
         except Exception as e:
-            st.error(f"An unexpected error occurred: {str(e)}")
-            st.error("Please check the following:")
-            st.error("1. Is the Raspberry Pi powered on and connected to the network?")
-            st.error("2. Is the socket server running on the Raspberry Pi?")
-            st.error("3. Is the Raspberry Pi's IP address correct?")
-            st.error("4. Are both devices on the same network?")
+            st.error(f"An error occurred: {str(e)}")
 
     # Fetch user workout data from 'userWorkouts' table where username matches session state
     username = st.session_state['username']
