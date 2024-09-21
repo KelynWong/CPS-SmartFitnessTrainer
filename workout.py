@@ -41,7 +41,28 @@ def workout_page():
 
     # Button click logic to display YouTube URL
     if start_button and ip_address:
-        st.video("https://www.youtube.com/watch?v=378riaPlpFw")
+        try:
+            # Call the API to start the workout stream
+            st.write("Starting workout...")
+            api_url = f"http://{ip_address}:5000/start"
+            response = requests.post(api_url)
+
+            # Check if the request was successful
+            if response.status_code == 200:
+                result = response.json()
+                watch_url = result.get("watch_url")
+
+                # Display the returned watch_url
+                if watch_url:
+                    st.write("Stream started successfully! Here is your workout video:")
+                    st.video(watch_url, autoplay=True)
+                else:
+                    st.error("Failed to retrieve the watch URL from the response.")
+            else:
+                st.error(f"Failed to start the workout stream. Status code: {response.status_code}")
+
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
 
     # Fetch user workout data from 'userWorkouts' table where username matches session state
     username = st.session_state['username']
