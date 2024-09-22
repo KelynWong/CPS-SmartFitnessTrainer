@@ -3,6 +3,7 @@ import supabase
 import pandas as pd
 import plotly.express as px
 import requests
+import time
 
 def workout_page():
     # Initialize Supabase client
@@ -53,8 +54,20 @@ def workout_page():
     if start_button and ip_address:
         try:
             st.write("Starting workout...")
+
+            # Capture the start datetime when the workout starts
+            startDT = time.strftime("%Y-%m-%dT%H:%M:%SZ")  # ISO 8601 format
+            
+            # Prepare the payload
+            payload = {
+                "username": st.session_state['username'],  # Get username from session state
+                "workout": selected_workout,               # Selected workout from the dropdown
+                "startDT": startDT                         # Start datetime
+            }
+
+            # Make the POST request to the server with the workout data
             api_url = f"https://{ip_address}/start"
-            response = requests.post(api_url)
+            response = requests.post(api_url, json=payload)
 
             if response.status_code == 200:
                 result = response.json()
@@ -72,12 +85,22 @@ def workout_page():
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
+
     # Logic to handle the Stop Workout button click
     if stop_button and ip_address:
         try:
             st.write("Stopping workout...")
+
+            # Prepare the payload (send the same workout details to the stop endpoint)
+            payload = {
+                "username": st.session_state['username'],  # Username from session state
+                "workout": selected_workout,               # Selected workout from the dropdown
+                "startDT": startDT                         # Use the same startDT
+            }
+
+            # Make the POST request to the server to stop the workout
             api_url = f"https://{ip_address}/stop"
-            response = requests.post(api_url)
+            response = requests.post(api_url, json=payload)
 
             if response.status_code == 200:
                 st.write("Workout stopped successfully.")
