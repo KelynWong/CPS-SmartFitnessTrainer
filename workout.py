@@ -42,12 +42,12 @@ def workout_page():
     with col3:
         st.write(" ")
         st.write(" ")
-        start_button = st.button("Start Workout", disabled=st.session_state['workout_running'] or not ip_address)
+        start_button = st.button("Start Workout", disabled=not ip_address)
         
     with col4:
         st.write(" ")
         st.write(" ")
-        stop_button = st.button("Stop Workout", disabled=not st.session_state['workout_running'])
+        stop_button = st.button("Stop Workout")
 
     # Logic to handle the Start Workout button click
     if start_button and ip_address:
