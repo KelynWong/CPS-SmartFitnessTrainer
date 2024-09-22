@@ -38,50 +38,57 @@ def workout_page():
     if "workout_running" not in st.session_state:
         st.session_state['workout_running'] = False
 
-    # Set button text based on workout state
-    button_text = "Stop Workout" if st.session_state['workout_running'] else "Start Workout"
+    # Disable buttons based on workout state and IP address
+    start_disabled = not ip_address or st.session_state['workout_running']
+    stop_disabled = not st.session_state['workout_running']
 
+    # Create Start and Stop buttons
     with col3:
         st.write(" ")
         st.write(" ")
-        workout_button = st.button(button_text)
+        start_button = st.button("Start Workout", disabled=start_disabled)
+        stop_button = st.button("Stop Workout", disabled=stop_disabled)
 
-    # Button click logic to toggle between starting and stopping the workout
-    if workout_button and ip_address:
+    # Button click logic to start the workout
+    if start_button and ip_address and not st.session_state['workout_running']:
         try:
-            if not st.session_state['workout_running']:
-                # Call the API to start the workout stream
-                st.write("Starting workout...")
-                api_url = f"https://{ip_address}/start"
-                response = requests.post(api_url)
+            # Call the API to start the workout stream
+            st.write("Starting workout...")
+            api_url = f"https://{ip_address}/start"
+            response = requests.post(api_url)
 
-                # Check if the request was successful
-                if response.status_code == 200:
-                    result = response.json()
-                    watch_url = result.get("watch_url")
+            # Check if the request was successful
+            if response.status_code == 200:
+                result = response.json()
+                watch_url = result.get("watch_url")
 
-                    # Display the returned watch_url
-                    if watch_url:
-                        st.write("Stream started successfully! Here is your workout video:")
-                        st.video(watch_url, autoplay=True)
-                        st.session_state['workout_running'] = True  # Set workout to running
-                    else:
-                        st.error("Failed to retrieve the watch URL from the response.")
+                # Display the returned watch_url
+                if watch_url:
+                    st.write("Stream started successfully! Here is your workout video:")
+                    st.video(watch_url, autoplay=True)
+                    st.session_state['workout_running'] = True  # Set workout to running
                 else:
-                    st.error(f"Failed to start the workout stream. Status code: {response.status_code}")
-
+                    st.error("Failed to retrieve the watch URL from the response.")
             else:
-                # Call the API to stop the workout stream
-                st.write("Stopping workout...")
-                api_url = f"https://{ip_address}/stop"
-                response = requests.post(api_url)
+                st.error(f"Failed to start the workout stream. Status code: {response.status_code}")
 
-                # Check if the request was successful
-                if response.status_code == 200:
-                    st.write("Workout stopped successfully.")
-                    st.session_state['workout_running'] = False  # Set workout to not running
-                else:
-                    st.error(f"Failed to stop the workout stream. Status code: {response.status_code}")
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+
+    # Button click logic to stop the workout
+    if stop_button and st.session_state['workout_running']:
+        try:
+            # Call the API to stop the workout stream
+            st.write("Stopping workout...")
+            api_url = f"https://{ip_address}/stop"
+            response = requests.post(api_url)
+
+            # Check if the request was successful
+            if response.status_code == 200:
+                st.write("Workout stopped successfully.")
+                st.session_state['workout_running'] = False  # Set workout to not running
+            else:
+                st.error(f"Failed to stop the workout stream. Status code: {response.status_code}")
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
