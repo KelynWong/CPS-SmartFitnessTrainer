@@ -44,7 +44,7 @@ def workout_page():
         try:
             # Call the API to start the workout stream
             st.write("Starting workout...")
-            api_url = f"https://{ip_address}:5000/start"
+            api_url = f"https://{ip_address}/start"
             response = requests.post(api_url)
 
             # Check if the request was successful
