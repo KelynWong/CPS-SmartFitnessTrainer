@@ -4,10 +4,15 @@ import pandas as pd
 import plotly.express as px
 import requests
 import time
+from datetime import datetime
 
 def workout_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+
+    # Ensure 'startDT' is initialized in session state
+    if 'startDT' not in st.session_state:
+        st.session_state['startDT'] = None
 
     col1, col2 = st.columns([4,1])
     with col1:
@@ -55,14 +60,14 @@ def workout_page():
         try:
             st.write("Starting workout...")
 
-            # Capture the start datetime when the workout starts
-            startDT = time.strftime("%Y-%m-%dT%H:%M:%SZ")  # ISO 8601 format
+            # Capture the current datetime when the workout starts and store it in session state
+            st.session_state['startDT'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Datetime format without timezone
             
             # Prepare the payload
             payload = {
                 "username": st.session_state['username'],  # Get username from session state
                 "workout": selected_workout,               # Selected workout from the dropdown
-                "startDT": startDT                         # Start datetime
+                "startDT": st.session_state['startDT']     # Start datetime stored in session state
             }
 
             # Make the POST request to the server with the workout data
@@ -91,27 +96,31 @@ def workout_page():
         try:
             st.write("Stopping workout...")
 
-            # Prepare the payload
-            payload = {
-                "username": st.session_state['username'],  # Username from session state
-                "workout": selected_workout,               # Selected workout from the dropdown
-                "startDT": startDT                         # Use the same startDT
-            }
-
-            # Set headers to specify the content type
-            headers = {
-                "Content-Type": "application/json"  
-            }
-
-            # Make the POST request to the server to stop the workout
-            api_url = f"https://{ip_address}/stop"
-            response = requests.post(api_url, json=payload, headers=headers)
-
-            if response.status_code == 200:
-                st.write("Workout stopped successfully.")
-                st.session_state['workout_running'] = False
+            # Check if startDT is set in session state before proceeding
+            if st.session_state['startDT'] is None:
+                st.error("Start time is not set. Please start the workout first.")
             else:
-                st.error(f"Failed to stop the workout stream. Status code: {response.status_code}")
+                # Prepare the payload using the startDT stored in session state
+                payload = {
+                    "username": st.session_state['username'],  # Username from session state
+                    "workout": selected_workout,               # Selected workout from the dropdown
+                    "startDT": st.session_state['startDT']     # Use the startDT from session state
+                }
+
+                # Set headers to specify the content type
+                headers = {
+                    "Content-Type": "application/json"  
+                }
+
+                # Make the POST request to the server to stop the workout
+                api_url = f"https://{ip_address}/stop"
+                response = requests.post(api_url, json=payload, headers=headers)
+
+                if response.status_code == 200:
+                    st.write("Workout stopped successfully.")
+                    st.session_state['workout_running'] = False
+                else:
+                    st.error(f"Failed to stop the workout stream. Status code: {response.status_code}")
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
