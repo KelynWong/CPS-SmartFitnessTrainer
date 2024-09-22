@@ -26,7 +26,7 @@ def workout_page():
         workouts = [workout['name'] for workout in workout_response.data]
 
     # Use st.columns to arrange components side by side
-    col1, col2, col3 = st.columns([3, 3, 1])
+    col1, col2, col3, col4 = st.columns([3, 3, 1, 1])
 
     with col1:
         selected_workout = st.selectbox("Select a Workout", workouts)
@@ -43,6 +43,10 @@ def workout_page():
         st.write(" ")
         st.write(" ")
         start_button = st.button("Start Workout", disabled=st.session_state['workout_running'] or not ip_address)
+        
+    with col4:
+        st.write(" ")
+        st.write(" ")
         stop_button = st.button("Stop Workout", disabled=not st.session_state['workout_running'])
 
     # Logic to handle the Start Workout button click
