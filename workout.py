@@ -34,32 +34,54 @@ def workout_page():
     with col2:
         ip_address = st.text_input("Enter Raspberry Pi IP Address")
 
+    # Initialize the workout status if it's not in session state
+    if "workout_running" not in st.session_state:
+        st.session_state['workout_running'] = False
+
+    # Set button text based on workout state
+    button_text = "Stop Workout" if st.session_state['workout_running'] else "Start Workout"
+
     with col3:
         st.write(" ")
         st.write(" ")
-        start_button = st.button("Start Workout")
+        workout_button = st.button(button_text)
 
-    # Button click logic to display YouTube URL
-    if start_button and ip_address:
+    # Button click logic to toggle between starting and stopping the workout
+    if workout_button and ip_address:
         try:
-            # Call the API to start the workout stream
-            st.write("Starting workout...")
-            api_url = f"https://{ip_address}/start"
-            response = requests.post(api_url)
+            if not st.session_state['workout_running']:
+                # Call the API to start the workout stream
+                st.write("Starting workout...")
+                api_url = f"https://{ip_address}/start"
+                response = requests.post(api_url)
 
-            # Check if the request was successful
-            if response.status_code == 200:
-                result = response.json()
-                watch_url = result.get("watch_url")
+                # Check if the request was successful
+                if response.status_code == 200:
+                    result = response.json()
+                    watch_url = result.get("watch_url")
 
-                # Display the returned watch_url
-                if watch_url:
-                    st.write("Stream started successfully! Here is your workout video:")
-                    st.video(watch_url, autoplay=True)
+                    # Display the returned watch_url
+                    if watch_url:
+                        st.write("Stream started successfully! Here is your workout video:")
+                        st.video(watch_url, autoplay=True)
+                        st.session_state['workout_running'] = True  # Set workout to running
+                    else:
+                        st.error("Failed to retrieve the watch URL from the response.")
                 else:
-                    st.error("Failed to retrieve the watch URL from the response.")
+                    st.error(f"Failed to start the workout stream. Status code: {response.status_code}")
+
             else:
-                st.error(f"Failed to start the workout stream. Status code: {response.status_code}")
+                # Call the API to stop the workout stream
+                st.write("Stopping workout...")
+                api_url = f"https://{ip_address}/stop"
+                response = requests.post(api_url)
+
+                # Check if the request was successful
+                if response.status_code == 200:
+                    st.write("Workout stopped successfully.")
+                    st.session_state['workout_running'] = False  # Set workout to not running
+                else:
+                    st.error(f"Failed to stop the workout stream. Status code: {response.status_code}")
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
