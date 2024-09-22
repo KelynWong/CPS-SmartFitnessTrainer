@@ -38,26 +38,20 @@ def workout_page():
     if "workout_running" not in st.session_state:
         st.session_state['workout_running'] = False
 
-    # Disable buttons based on workout state and IP address
-    start_disabled = not ip_address or st.session_state['workout_running']
-    stop_disabled = not st.session_state['workout_running']
-
-    # Create Start and Stop buttons
+    # Separate buttons for Start and Stop Workout
     with col3:
         st.write(" ")
         st.write(" ")
-        start_button = st.button("Start Workout", disabled=start_disabled)
-        stop_button = st.button("Stop Workout", disabled=stop_disabled)
+        start_button = st.button("Start Workout", disabled=st.session_state['workout_running'] or not ip_address)
+        stop_button = st.button("Stop Workout", disabled=not st.session_state['workout_running'])
 
-    # Button click logic to start the workout
-    if start_button and ip_address and not st.session_state['workout_running']:
+    # Logic to handle the Start Workout button click
+    if start_button and ip_address:
         try:
-            # Call the API to start the workout stream
             st.write("Starting workout...")
             api_url = f"https://{ip_address}/start"
             response = requests.post(api_url)
 
-            # Check if the request was successful
             if response.status_code == 200:
                 result = response.json()
                 watch_url = result.get("watch_url")
@@ -66,30 +60,26 @@ def workout_page():
                 if watch_url:
                     st.write("Stream started successfully! Here is your workout video:")
                     st.video(watch_url, autoplay=True)
-                    st.session_state['workout_running'] = True  # Set workout to running
+                    st.session_state['workout_running'] = True
                 else:
                     st.error("Failed to retrieve the watch URL from the response.")
             else:
                 st.error(f"Failed to start the workout stream. Status code: {response.status_code}")
-
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
-    # Button click logic to stop the workout
-    if stop_button and st.session_state['workout_running']:
+    # Logic to handle the Stop Workout button click
+    if stop_button and ip_address:
         try:
-            # Call the API to stop the workout stream
             st.write("Stopping workout...")
             api_url = f"https://{ip_address}/stop"
             response = requests.post(api_url)
 
-            # Check if the request was successful
             if response.status_code == 200:
                 st.write("Workout stopped successfully.")
-                st.session_state['workout_running'] = False  # Set workout to not running
+                st.session_state['workout_running'] = False
             else:
                 st.error(f"Failed to stop the workout stream. Status code: {response.status_code}")
-
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
@@ -98,43 +88,34 @@ def workout_page():
     user_workout_response = supabase_client.table('userWorkouts').select('*').eq('username', username).execute()
 
     if user_workout_response.data:
-        # Convert the data into a pandas DataFrame for easier analysis and visualization
         df = pd.DataFrame(user_workout_response.data)
 
-        # Display the data as a table
         st.subheader(f"Workout Data for {username}")
         st.dataframe(df)
 
-        # Convert startDT and endDT columns to datetime format for plotting
         df['startDT'] = pd.to_datetime(df['startDT'])
         df['endDT'] = pd.to_datetime(df['endDT'])
 
         st.subheader(f"Workout Analysis")
-        # First Row: Total Reps Over Time and Workout Frequency
         col1, col2 = st.columns(2)
         with col1:
-            # Calculate total reps over time
             fig_reps = px.line(df, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
             st.plotly_chart(fig_reps, use_container_width=True)
 
         with col2:
-            # Workout frequency analysis (count of workouts over time)
             df['workout_date'] = df['startDT'].dt.date
             workout_count = df.groupby('workout_date').size().reset_index(name='Workout Count')
             fig_workout_freq = px.bar(workout_count, x='workout_date', y='Workout Count', title='Workout Frequency Over Time')
             st.plotly_chart(fig_workout_freq, use_container_width=True)
 
-        # Second Row: Average Reps per Workout and Duration of Workouts
         col1, col2 = st.columns(2)
         with col1:
-            # Average reps per workout
             avg_reps_per_workout = df.groupby('workout')['reps'].mean().reset_index()
             fig_avg_reps = px.bar(avg_reps_per_workout, x='workout', y='reps', title='Average Reps per Workout')
             st.plotly_chart(fig_avg_reps, use_container_width=True)
 
         with col2:
-            # Duration of workouts
-            df['duration'] = (df['endDT'] - df['startDT']).dt.total_seconds() / 60  # Convert duration to minutes
+            df['duration'] = (df['endDT'] - df['startDT']).dt.total_seconds() / 60
             fig_duration = px.bar(df, x='workout', y='duration', title='Duration of Workouts', text='duration')
             fig_duration.update_traces(texttemplate='%{text:.2f} min', textposition='outside')
             st.plotly_chart(fig_duration, use_container_width=True)
