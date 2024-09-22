@@ -91,16 +91,21 @@ def workout_page():
         try:
             st.write("Stopping workout...")
 
-            # Prepare the payload (send the same workout details to the stop endpoint)
+            # Prepare the payload
             payload = {
                 "username": st.session_state['username'],  # Username from session state
                 "workout": selected_workout,               # Selected workout from the dropdown
                 "startDT": startDT                         # Use the same startDT
             }
 
+            # Set headers to specify the content type
+            headers = {
+                "Content-Type": "application/json"  
+            }
+
             # Make the POST request to the server to stop the workout
             api_url = f"https://{ip_address}/stop"
-            response = requests.post(api_url, json=payload)
+            response = requests.post(api_url, json=payload, headers=headers)
 
             if response.status_code == 200:
                 st.write("Workout stopped successfully.")
