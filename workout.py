@@ -61,7 +61,7 @@ def workout_page():
             st.write("Starting workout...")
 
             # Capture the current datetime when the workout starts and store it in session state
-            st.session_state['startDT'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Datetime format without timezone
+            st.session_state['startDT'] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
             
             # Prepare the payload
             payload = {
