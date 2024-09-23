@@ -5,6 +5,7 @@ import plotly.express as px
 import requests
 import time
 from datetime import datetime
+import pytz
 
 def workout_page():
     # Initialize Supabase client
@@ -61,7 +62,14 @@ def workout_page():
             st.write("Starting workout...")
 
             # Capture the current datetime when the workout starts and store it in session state
-            st.session_state['startDT'] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            tz = pytz.timezone('Asia/Singapore')  # Replace with the desired timezone
+
+            # Get the current time in the specified timezone
+            current_time = datetime.now(tz)
+
+            # Format the time as a string with timezone information
+            formatted_time = current_time.strftime("%Y-%m-%dT%H:%M:%S%z")  # %z adds timezone offset
+            st.session_state['startDT'] = formatted_time
             
             # Prepare the payload
             payload = {
