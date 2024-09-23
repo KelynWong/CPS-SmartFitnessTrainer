@@ -38,7 +38,7 @@ def workout_page():
         selected_workout = st.selectbox("Select a Workout", workouts)
 
     with col2:
-        ip_address = st.text_input("Enter Raspberry Pi IP Address")
+        ip_address = st.text_input("Enter Server Address")
 
     # Initialize the workout status if it's not in session state
     if "workout_running" not in st.session_state:
@@ -71,7 +71,7 @@ def workout_page():
             }
 
             # Make the POST request to the server with the workout data
-            api_url = f"https://{ip_address}/start"
+            api_url = f"https://{ip_address}.ngrok-free.app/start"
             response = requests.post(api_url, json=payload)
 
             if response.status_code == 200:
@@ -113,7 +113,7 @@ def workout_page():
                 }
 
                 # Make the POST request to the server to stop the workout
-                api_url = f"https://{ip_address}/stop"
+                api_url = f"https://{ip_address}.ngrok-free.app/stop"
                 response = requests.post(api_url, json=payload, headers=headers)
 
                 if response.status_code == 200:
