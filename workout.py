@@ -138,6 +138,8 @@ def workout_page():
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
+    st.divider()
+
     # Fetch user workout data from 'userWorkouts' table where username matches session state
     username = st.session_state['username']
     user_workout_response = supabase_client.table('userWorkouts').select('*').eq('username', username).execute()
