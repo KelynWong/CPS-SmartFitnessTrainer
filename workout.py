@@ -15,7 +15,7 @@ def workout_page():
     if 'startDT' not in st.session_state:
         st.session_state['startDT'] = None
 
-    col1, col2 = st.columns([4,1])
+    col1, col2, col3 = st.columns([4,1,1])
     with col1:
         st.title("Smart Fitness Trainer - Workout Dashboard")
 
@@ -25,6 +25,12 @@ def workout_page():
         profile_button = st.button("Go to profile")
         if profile_button:
             st.session_state['current_page'] = 'profile'
+            st.rerun()
+
+    with col3:
+        # Add a button to logout
+        if st.button("Logout"):
+            st.session_state["authenticated"] = False
             st.rerun()
 
     # Fetch workouts from Supabase

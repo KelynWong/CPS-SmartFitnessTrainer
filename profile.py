@@ -6,7 +6,7 @@ def profile_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_SERVICE_ROLE_KEY"])
 
-    col1, col2 = st.columns([4, 1])
+    col1, col2, col3 = st.columns([4, 1, 1])
     with col1:
         st.title("Profile Page")
 
@@ -14,6 +14,12 @@ def profile_page():
         # Add a button to navigate back to the workout page
         if st.button("Go to Workout Page"):
             st.session_state['current_page'] = 'workout'
+            st.rerun()
+
+    with col3:
+        # Add a button to logout
+        if st.button("Logout"):
+            st.session_state["authenticated"] = False
             st.rerun()
 
     # Get the logged-in user's username from session state
