@@ -17,7 +17,7 @@ def workout_page():
 
     col1, col2, col3 = st.columns([4,1,1])
     with col1:
-        st.title("Smart Fitness Trainer - Workout Dashboard")
+        st.title("Workout Dashboard")
 
     with col2:
         # Add a button to navigate to the profile page
@@ -143,6 +143,7 @@ def workout_page():
     user_workout_response = supabase_client.table('userWorkouts').select('*').eq('username', username).execute()
 
     if user_workout_response.data:
+        st.header("Workout Historical Data & A")
         df = pd.DataFrame(user_workout_response.data)
 
         st.subheader(f"Workout Data for {username}")
