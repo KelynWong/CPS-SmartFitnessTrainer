@@ -29,6 +29,7 @@ def workout_page():
 
     with col3:
         # Add a button to logout
+        st.write(" ")
         if st.button("Logout"):
             st.session_state["authenticated"] = False
             st.rerun()
