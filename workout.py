@@ -7,6 +7,15 @@ import time
 from datetime import datetime
 import pytz
 
+# Function to calculate calories burned using the formula based on gender
+def calculate_calories_burned(gender, duration, heart_rate, weight, age):
+    if gender == "Female":
+        return duration * ((0.4472 * heart_rate - 0.1263 * weight + 0.074 * age - 20.4022) / 4.184)
+    elif gender == "Male":
+        return duration * ((0.6309 * heart_rate + 0.1988 * weight + 0.2017 * age - 55.0969) / 4.184)
+    else:
+        return 0  # Return 0 if gender is not valid
+
 def workout_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
@@ -78,6 +87,11 @@ def workout_page():
             formatted_time = current_time.strftime("%Y-%m-%dT%H:%M:%S%z")  # %z adds timezone offset
             st.session_state['startDT'] = formatted_time
             
+            # Set headers to specify the content type
+            headers = {
+                "Content-Type": "application/json"  
+            }
+            
             # Prepare the payload
             payload = {
                 "username": st.session_state['username'],  # Get username from session state
@@ -87,7 +101,7 @@ def workout_page():
 
             # Make the POST request to the server with the workout data
             api_url = f"https://{ip_address}.ngrok-free.app/start"
-            response = requests.post(api_url, json=payload)
+            response = requests.post(api_url, json=payload, headers=headers)
 
             if response.status_code == 200:
                 result = response.json()
@@ -141,42 +155,85 @@ def workout_page():
 
     st.divider()
 
-    # Fetch user workout data from 'userWorkouts' table where username matches session state
+    # Fetch user data
     username = st.session_state['username']
+
+    # Fetch user workout data
     user_workout_response = supabase_client.table('userWorkouts').select('*').eq('username', username).execute()
+    user_health_response = supabase_client.table('userWorkoutHealth').select('*').eq('username', username).execute()
+    user_response = supabase_client.table('user').select('*').eq('username', username).execute()
 
-    if user_workout_response.data:
+    # Ensure there is workout data
+    if user_workout_response.data and user_response.data:
         st.header("Workout Historical Data & Analytics")
-        df = pd.DataFrame(user_workout_response.data)
+        
+        # Convert data to DataFrames
+        df_workout = pd.DataFrame(user_workout_response.data)
+        df_health = pd.DataFrame(user_health_response.data)
+        df_user = pd.DataFrame(user_response.data).iloc[0]  # Fetch the first user record (assuming one user)
 
-        st.subheader(f"Workout Data for {username}")
-        st.dataframe(df)
-
-        df['startDT'] = pd.to_datetime(df['startDT'])
-        df['endDT'] = pd.to_datetime(df['endDT'])
-
-        st.subheader(f"Workout Analysis")
+        # Display User Goals and Profile Info
+        st.subheader(f"User Profile for {username}")
         col1, col2 = st.columns(2)
         with col1:
-            fig_reps = px.line(df, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
-            st.plotly_chart(fig_reps, use_container_width=True)
-
+            st.image(df_user['profilePicture'], width=150, caption=f"{df_user['age']} years old, {df_user['weight']} kg, {df_user['gender']}")
         with col2:
-            df['workout_date'] = df['startDT'].dt.date
-            workout_count = df.groupby('workout_date').size().reset_index(name='Workout Count')
+            st.metric(label="Calories Burn Goal (Daily)", value=df_user['caloriesBurnPerDay'] or 'Not Set')
+            st.metric(label="Workout Duration Goal (Daily)", value=f"{df_user['workoutDurationPerDay']} mins" if df_user['workoutDurationPerDay'] else 'Not Set')
+            st.metric(label="Workout Frequency Goal (Weekly)", value=f"{df_user['workoutFrequencyPerWeek']} sessions" if df_user['workoutFrequencyPerWeek'] else 'Not Set')
+
+        # Convert dates to datetime
+        df_workout['startDT'] = pd.to_datetime(df_workout['startDT'])
+        df_workout['endDT'] = pd.to_datetime(df_workout['endDT'])
+
+        # Calculate duration and calories burned
+        df_workout['duration'] = (df_workout['endDT'] - df_workout['startDT']).dt.total_seconds() / 60
+        
+        # Assuming the health data contains heart rates during the workout
+        if not df_health.empty:
+            # Group health data by workout_id and get average heart rate for each workout
+            avg_heart_rate = df_health.groupby('workout_id')['heartbeat'].mean().reset_index()
+            df_workout = df_workout.merge(avg_heart_rate, on='workout_id', how='left')  # Join with workout data
+        
+        # Calculate calories burned for each workout
+        df_workout['caloriesBurned'] = df_workout.apply(
+            lambda row: calculate_calories_burned(df_user['gender'], row['duration'], row['heartbeat'], df_user['weight'], df_user['age']),
+            axis=1
+        )
+
+        # Display workout data
+        st.subheader(f"Workout Data for {username}")
+        st.dataframe(df_workout[['startDT', 'endDT', 'workout', 'reps', 'heartbeat', 'duration', 'caloriesBurned']])
+
+        # Workout Analysis
+        st.subheader("Workout Analysis")
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_reps = px.line(df_workout, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
+            st.plotly_chart(fig_reps, use_container_width=True)
+        
+        with col2:
+            df_workout['workout_date'] = df_workout['startDT'].dt.date
+            workout_count = df_workout.groupby('workout_date').size().reset_index(name='Workout Count')
             fig_workout_freq = px.bar(workout_count, x='workout_date', y='Workout Count', title='Workout Frequency Over Time')
             st.plotly_chart(fig_workout_freq, use_container_width=True)
 
+        # Average reps per workout type
         col1, col2 = st.columns(2)
         with col1:
-            avg_reps_per_workout = df.groupby('workout')['reps'].mean().reset_index()
+            avg_reps_per_workout = df_workout.groupby('workout')['reps'].mean().reset_index()
             fig_avg_reps = px.bar(avg_reps_per_workout, x='workout', y='reps', title='Average Reps per Workout')
             st.plotly_chart(fig_avg_reps, use_container_width=True)
 
         with col2:
-            df['duration'] = (df['endDT'] - df['startDT']).dt.total_seconds() / 60
-            fig_duration = px.bar(df, x='workout', y='duration', title='Duration of Workouts', text='duration')
+            fig_duration = px.bar(df_workout, x='workout', y='duration', title='Duration of Workouts', text='duration')
             fig_duration.update_traces(texttemplate='%{text:.2f} min', textposition='outside')
             st.plotly_chart(fig_duration, use_container_width=True)
+
+        # Calories burned section
+        st.subheader("Calories Burned Per Workout")
+        st.dataframe(df_workout[['workout', 'duration', 'heartbeat', 'caloriesBurned']])
+
     else:
         st.warning("No workout data found for the current user.")
+
