@@ -158,9 +158,16 @@ def workout_page():
     # Fetch user data
     username = st.session_state['username']
 
-    # Fetch user workout data
+    # Fetch user workout data by username
     user_workout_response = supabase_client.table('userWorkouts').select('*').eq('username', username).execute()
-    user_health_response = supabase_client.table('userWorkoutHealth').select('*').eq('username', username).execute()
+
+    # Extract workout_id from the fetched workout data
+    workout_ids = [workout['workout_id'] for workout in user_workout_response.data]
+
+    # Fetch health data linked to the workout_ids
+    user_health_response = supabase_client.table('userWorkoutHealth').select('*').in_('workout_id', workout_ids).execute()
+
+    # Fetch user data by username
     user_response = supabase_client.table('user').select('*').eq('username', username).execute()
 
     # Ensure there is workout data
