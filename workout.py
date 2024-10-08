@@ -172,7 +172,7 @@ def workout_page():
 
     if user_workout_response.data and user_response.data:
         st.header("Workout Historical Data & Analytics")
-        
+
         # Load data into DataFrame
         df_workouts = pd.DataFrame(user_workout_response.data)
         df_health = pd.DataFrame(user_health_response.data)
@@ -199,7 +199,7 @@ def workout_page():
 
         # Check goals
         st.subheader("Goal Tracking")
-        
+
         if daily_duration_goal:
             avg_duration = df_workouts['duration'].mean()
             st.write(f"**Daily Duration Goal:** {daily_duration_goal} minutes")
@@ -208,7 +208,7 @@ def workout_page():
                 st.success("You are meeting your daily workout duration goal!")
             else:
                 st.warning("You are not meeting your daily workout duration goal.")
-        
+
         if frequency_goal:
             avg_frequency = workouts_per_week['workouts_per_week'].mean()
             st.write(f"**Weekly Frequency Goal:** {frequency_goal} workouts/week")
@@ -217,7 +217,7 @@ def workout_page():
                 st.success("You are meeting your weekly workout frequency goal!")
             else:
                 st.warning("You are not meeting your weekly workout frequency goal.")
-        
+
         if calories_goal:
             # Calculate calories burned based on the formula
             gender = user_info['gender']
@@ -239,20 +239,26 @@ def workout_page():
                 st.success("You are meeting your daily calories burn goal!")
             else:
                 st.warning("You are not meeting your daily calories burn goal.")
-        
+
         # Workout and health data visualization
         st.subheader(f"Workout Data for {username}")
         st.dataframe(df_workouts)
 
-        # Reps and Calories burned over time
+        # Ensure no None or NaN values in the 'reps', 'duration', or 'calories_burned' columns
+        df_workouts['reps'] = df_workouts['reps'].fillna(0)  # Replace None/NaN with 0
+        df_workouts['duration'] = df_workouts['duration'].fillna(0)  # Replace None/NaN with 0
+        df_workouts['calories_burned'] = df_workouts['calories_burned'].fillna(0)  # Replace None/NaN with 0
+
+        # Now calculate the reps per workout safely
         col1, col2 = st.columns(2)
         with col1:
-            fig_reps = px.line(df_workouts, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
-            st.plotly_chart(fig_reps, use_container_width=True)
+            avg_reps_per_workout = df_workouts.groupby('workout_id')['reps'].mean().reset_index(name='avg_reps_per_workout')
+            fig_avg_reps = px.bar(avg_reps_per_workout, x='workout_id', y='avg_reps_per_workout', title='Average Reps Per Workout')
+            st.plotly_chart(fig_avg_reps, use_container_width=True)
 
         with col2:
-            fig_calories = px.bar(df_workouts, x='workout_date', y='calories_burned', title='Calories Burned per Workout')
-            st.plotly_chart(fig_calories, use_container_width=True)
+            fig_duration = px.bar(df_workouts, x='workout_date', y='duration', title='Workout Duration Over Time')
+            st.plotly_chart(fig_duration, use_container_width=True)
 
         # Heart rate trend
         st.subheader("Heart Rate Analysis")
@@ -266,4 +272,3 @@ def workout_page():
 
     else:
         st.warning("No workout data found for the current user.")
-
