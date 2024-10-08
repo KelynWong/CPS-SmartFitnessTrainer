@@ -51,7 +51,7 @@ def profile_page():
                     uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
                 col1, col2, col3 = st.columns(3)
-                st.caption("Basic Info")
+                st.subheader("Basic Info")
                 with col1:
                     age = st.number_input("Age", value=user_data.get('age', 0), min_value=0)
                 
@@ -62,7 +62,7 @@ def profile_page():
                     gender = st.selectbox("Gender", options=["Male", "Female"], index=0 if user_data.get('gender') == "Male" else 1)
 
                 col1, col2, col3 = st.columns(3)
-                st.caption("Goal Setting")
+                st.subheader("Goal Setting")
                 with col1:
                     calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
                 
