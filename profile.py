@@ -51,6 +51,18 @@ def profile_page():
                     uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
                 col1, col2, col3 = st.columns(3)
+                st.caption("Basic Info")
+                with col1:
+                    age = st.number_input("Age", value=user_data.get('age', 0), min_value=0)
+                
+                with col2:
+                    weight = st.number_input("Weight (kg)", value=user_data.get('weight', 0.0), min_value=0.0)
+                
+                with col3:
+                    gender = st.selectbox("Gender", options=["Male", "Female"], index=0 if user_data.get('gender') == "Male" else 1)
+
+                col1, col2, col3 = st.columns(3)
+                st.caption("Goal Setting")
                 with col1:
                     calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
                 
@@ -59,11 +71,6 @@ def profile_page():
 
                 with col3:
                     workout_frequency = st.number_input("Workout Frequency per Week", value=user_data['workoutFrequencyPerWeek'], min_value=0)
-
-                # Additional fields for age, weight, and gender
-                age = st.number_input("Age", value=user_data.get('age', 0), min_value=0)
-                weight = st.number_input("Weight (kg)", value=user_data.get('weight', 0.0), min_value=0.0)
-                gender = st.selectbox("Gender", options=["Male", "Female"], index=0 if user_data.get('gender') == "Male" else 1)
 
                 # Submit button for saving changes
                 save_button = st.form_submit_button("Save Changes")
