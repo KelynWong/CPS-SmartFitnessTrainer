@@ -226,7 +226,7 @@ def workout_page():
             avg_heart_rate = df_health.groupby('workout_id')['heartrate'].mean().reset_index(name='avg_heartbeat')
 
             df_workouts = df_workouts.merge(avg_heart_rate, on='workout_id', how='left')
-
+            st.write(df_workouts)
             if gender == "Female":
                 df_workouts['calories_burned'] = df_workouts['duration'] * ((0.4472 * df_workouts['avg_heartbeat']) - (0.1263 * weight) + (0.074 * age) - 20.4022) / 4.184
             else:  # Male
