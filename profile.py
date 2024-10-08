@@ -27,7 +27,7 @@ def profile_page():
 
     try:
         # Fetch user details from 'user' table
-        user_response = supabase_client.table('user').select('username, caloriesBurnPerDay, durationPerWorkout, workoutFrequencyPerWeek, profilePicture').eq('username', username).single().execute()
+        user_response = supabase_client.table('user').select('*').eq('username', username).single().execute()
 
         if user_response:
             user_data = user_response.data
@@ -55,10 +55,15 @@ def profile_page():
                     calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
                 
                 with col2:
-                    duration_workout = st.number_input("Duration per Workout (in minutes)", value=user_data['durationPerWorkout'], min_value=0)
-                
+                    workout_duration_per_day = st.number_input("Duration per Workout (in minutes)", value=user_data['workoutDurationPerDay'], min_value=0)
+
                 with col3:
-                    frequency_workout = st.number_input("Workout Frequency per Week", value=user_data['workoutFrequencyPerWeek'], min_value=0)
+                    workout_frequency = st.number_input("Workout Frequency per Week", value=user_data['workoutFrequencyPerWeek'], min_value=0)
+
+                # Additional fields for age, weight, and gender
+                age = st.number_input("Age", value=user_data.get('age', 0), min_value=0)
+                weight = st.number_input("Weight (kg)", value=user_data.get('weight', 0.0), min_value=0.0)
+                gender = st.selectbox("Gender", options=["Male", "Female"], index=0 if user_data.get('gender') == "Male" else 1)
 
                 # Submit button for saving changes
                 save_button = st.form_submit_button("Save Changes")
@@ -96,8 +101,11 @@ def profile_page():
                     # Update the rest of the user profile data
                     update_response = supabase_client.table('user').update({
                         'caloriesBurnPerDay': calories_burn,
-                        'durationPerWorkout': duration_workout,
-                        'workoutFrequencyPerWeek': frequency_workout
+                        'workoutDurationPerDay': workout_duration_per_day,
+                        'workoutFrequencyPerWeek': workout_frequency,
+                        'age': age,
+                        'weight': weight,
+                        'gender': gender
                     }).eq('username', username).execute()
 
                     st.success("Profile updated successfully!")
