@@ -199,18 +199,18 @@ def workout_page():
         # Assuming the health data contains heart rates during the workout
         if not df_health.empty:
             # Group health data by workout_id and get average heart rate for each workout
-            avg_heart_rate = df_health.groupby('workout_id')['heartbeat'].mean().reset_index()
+            avg_heart_rate = df_health.groupby('workout_id')['heartrate'].mean().reset_index()
             df_workout = df_workout.merge(avg_heart_rate, on='workout_id', how='left')  # Join with workout data
         
         # Calculate calories burned for each workout
         df_workout['caloriesBurned'] = df_workout.apply(
-            lambda row: calculate_calories_burned(df_user['gender'], row['duration'], row['heartbeat'], df_user['weight'], df_user['age']),
+            lambda row: calculate_calories_burned(df_user['gender'], row['duration'], row['heartrate'], df_user['weight'], df_user['age']),
             axis=1
         )
 
         # Display workout data
         st.subheader(f"Workout Data for {username}")
-        st.dataframe(df_workout[['startDT', 'endDT', 'workout', 'reps', 'heartbeat', 'duration', 'caloriesBurned']])
+        st.dataframe(df_workout[['startDT', 'endDT', 'workout', 'reps', 'heartrate', 'duration', 'caloriesBurned']])
 
         # Workout Analysis
         st.subheader("Workout Analysis")
@@ -239,7 +239,7 @@ def workout_page():
 
         # Calories burned section
         st.subheader("Calories Burned Per Workout")
-        st.dataframe(df_workout[['workout', 'duration', 'heartbeat', 'caloriesBurned']])
+        st.dataframe(df_workout[['workout', 'duration', 'heartrate', 'caloriesBurned']])
 
     else:
         st.warning("No workout data found for the current user.")
