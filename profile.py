@@ -50,6 +50,7 @@ def profile_page():
                     # File uploader for profile picture
                     uploaded_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
+                st.divider()
                 st.subheader("Basic Info")
                 col1, col2, col3 = st.columns(3)
                 with col1:
@@ -61,6 +62,7 @@ def profile_page():
                 with col3:
                     gender = st.selectbox("Gender", options=["Male", "Female"], index=0 if user_data.get('gender') == "Male" else 1)
 
+                st.divider()
                 st.subheader("Goal Setting")
                 col1, col2, col3 = st.columns(3)
                 with col1:
