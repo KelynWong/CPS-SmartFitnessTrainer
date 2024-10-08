@@ -209,6 +209,7 @@ def workout_page():
             avg_heart_rate = df_health.groupby('workout_id')['heartrate'].mean().reset_index(name='avg_heartbeat')
             df_workouts = df_workouts.merge(avg_heart_rate, on='workout_id', how='left')
 
+            # Calculate calories burned based on gender
             if gender == "Female":
                 df_workouts['calories_burned'] = df_workouts['duration'] * (
                     (0.4472 * df_workouts['avg_heartbeat']) - 
@@ -222,32 +223,31 @@ def workout_page():
                     (0.2017 * age) - 
                     55.0969) / 4.184
 
-        # Goal Tracking Section
-        st.subheader("Goal Tracking")
+            # Goal Tracking Section
+            st.subheader("Goal Tracking")
 
-        # Check daily duration goal
-        if daily_duration_goal:
-            avg_duration = df_workouts['duration'].mean()
-            st.write(f"**Daily Duration Goal:** {daily_duration_goal} minutes")
-            st.write(f"**Average Workout Duration:** {avg_duration:.2f} minutes")
-            if avg_duration >= daily_duration_goal:
-                st.success("You are meeting your daily workout duration goal!")
-            else:
-                st.warning("You are not meeting your daily workout duration goal.")
+            # Check daily duration goal
+            if daily_duration_goal:
+                avg_duration = df_workouts['duration'].mean()
+                st.write(f"**Daily Duration Goal:** {daily_duration_goal} minutes")
+                st.write(f"**Average Workout Duration:** {avg_duration:.2f} minutes")
+                if avg_duration >= daily_duration_goal:
+                    st.success("You are meeting your daily workout duration goal!")
+                else:
+                    st.warning("You are not meeting your daily workout duration goal.")
 
-        # Check weekly frequency goal
-        if frequency_goal:
-            avg_frequency = workouts_per_week['workouts_per_week'].mean()
-            st.write(f"**Weekly Frequency Goal:** {frequency_goal} workouts/week")
-            st.write(f"**Average Workouts Per Week:** {avg_frequency:.2f} workouts/week")
-            if avg_frequency >= frequency_goal:
-                st.success("You are meeting your weekly workout frequency goal!")
-            else:
-                st.warning("You are not meeting your weekly workout frequency goal.")
+            # Check weekly frequency goal
+            if frequency_goal:
+                avg_frequency = workouts_per_week['workouts_per_week'].mean()
+                st.write(f"**Weekly Frequency Goal:** {frequency_goal} workouts/week")
+                st.write(f"**Average Workouts Per Week:** {avg_frequency:.2f} workouts/week")
+                if avg_frequency >= frequency_goal:
+                    st.success("You are meeting your weekly workout frequency goal!")
+                else:
+                    st.warning("You are not meeting your weekly workout frequency goal.")
 
-        # Check daily calories goal
-        if calories_goal:
-            if 'calories_burned' in df_workouts.columns:
+            # Check daily calories goal and display related metrics
+            if calories_goal and 'calories_burned' in df_workouts.columns:
                 total_calories_burned = df_workouts['calories_burned'].sum()
                 st.write(f"**Daily Calories Burn Goal:** {calories_goal} calories")
                 st.write(f"**Total Calories Burned:** {total_calories_burned:.2f} calories")
@@ -258,56 +258,58 @@ def workout_page():
             else:
                 st.warning("Calories burned data is not available. Please ensure your weight, age, and gender are set.")
 
-        # Create a calendar to display goal tracking
-        st.subheader("Goal Tracking Calendar")
-        
-        # Create a new DataFrame for goal tracking
-        goal_tracking = df_workouts.groupby('workout_date').agg({
-            'duration': 'mean', 
-            'calories_burned': 'sum'
-        }).reset_index()
-        
-        goal_tracking['met_duration_goal'] = goal_tracking['duration'] >= daily_duration_goal
-        goal_tracking['met_calories_goal'] = goal_tracking['calories_burned'] >= calories_goal
-        
-        # Create a calendar
-        for index, row in goal_tracking.iterrows():
-            date = row['workout_date']
-            met_duration = row['met_duration_goal']
-            met_calories = row['met_calories_goal']
-            
-            if met_duration and met_calories:
-                st.markdown(f"**{date}**: ✅ Met both goals!")
-            elif met_duration:
-                st.markdown(f"**{date}**: ✅ Met duration goal but ❌ Did not meet calories goal.")
-            elif met_calories:
-                st.markdown(f"**{date}**: ✅ Met calories goal but ❌ Did not meet duration goal.")
-            else:
-                st.markdown(f"**{date}**: ❌ Did not meet any goals.")
+            # Create a calendar to display goal tracking
+            st.subheader("Goal Tracking Calendar")
 
-        # Workout and health data visualization
-        st.subheader(f"Workout Data for {username}")
-        st.dataframe(df_workouts)
+            # Create a new DataFrame for goal tracking
+            goal_tracking = df_workouts.groupby('workout_date').agg({
+                'duration': 'mean', 
+                'calories_burned': 'sum'
+            }).reset_index()
 
-        # Reps and Calories burned over time
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_reps = px.line(df_workouts, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
-            st.plotly_chart(fig_reps, use_container_width=True)
+            goal_tracking['met_duration_goal'] = goal_tracking['duration'] >= daily_duration_goal
+            goal_tracking['met_calories_goal'] = goal_tracking['calories_burned'] >= calories_goal if calories_goal else False
 
-        with col2:
-            fig_calories = px.bar(df_workouts, x='workout_date', y='calories_burned', title='Calories Burned per Workout')
-            st.plotly_chart(fig_calories, use_container_width=True)
+            # Create a calendar
+            for index, row in goal_tracking.iterrows():
+                date = row['workout_date']
+                met_duration = row['met_duration_goal']
+                met_calories = row['met_calories_goal']
+                
+                if met_duration and met_calories:
+                    st.markdown(f"**{date}**: ✅ Met both goals!")
+                elif met_duration:
+                    st.markdown(f"**{date}**: ✅ Met duration goal but ❌ Did not meet calories goal.")
+                elif met_calories:
+                    st.markdown(f"**{date}**: ✅ Met calories goal but ❌ Did not meet duration goal.")
+                else:
+                    st.markdown(f"**{date}**: ❌ Did not meet any goals.")
 
-        # Heart rate trend
-        st.subheader("Heart Rate Analysis")
-        fig_heart_rate = px.line(df_health, x='timestamp', y='heartrate', color='workout_id', title='Heart Rate per Workout')
-        st.plotly_chart(fig_heart_rate, use_container_width=True)
+            # Workout and health data visualization
+            st.subheader(f"Workout Data for {username}")
+            st.dataframe(df_workouts)
 
-        # Workout duration over time
-        st.subheader("Workout Duration Analysis")
-        fig_duration = px.line(df_workouts, x='startDT', y='duration', title='Workout Duration Over Time', markers=True)
-        st.plotly_chart(fig_duration, use_container_width=True)
+            # Reps over time graph (will always display)
+            col1, col2 = st.columns(2)
+            with col1:
+                fig_reps = px.line(df_workouts, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
+                st.plotly_chart(fig_reps, use_container_width=True)
+
+            # Display calories graph only if weight, age, and gender are set
+            if weight is not None and age is not None and gender is not None:
+                with col2:
+                    fig_calories = px.bar(df_workouts, x='workout_date', y='calories_burned', title='Calories Burned per Workout')
+                    st.plotly_chart(fig_calories, use_container_width=True)
+
+            # Heart rate trend
+            st.subheader("Heart Rate Analysis")
+            fig_heart_rate = px.line(df_health, x='timestamp', y='heartrate', color='workout_id', title='Heart Rate per Workout')
+            st.plotly_chart(fig_heart_rate, use_container_width=True)
+
+            # Workout duration over time
+            st.subheader("Workout Duration Analysis")
+            fig_duration = px.line(df_workouts, x='startDT', y='duration', title='Workout Duration Over Time', markers=True)
+            st.plotly_chart(fig_duration, use_container_width=True)
 
     else:
         st.warning("No workout data found for the current user.")
