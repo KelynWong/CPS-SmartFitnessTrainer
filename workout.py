@@ -226,7 +226,6 @@ def workout_page():
             avg_heart_rate = df_health.groupby('workout_id')['heartrate'].mean().reset_index(name='avg_heartbeat')
 
             df_workouts = df_workouts.merge(avg_heart_rate, on='workout_id', how='left')
-            st.write(df_workouts)
 
             if gender == "Female":
                 df_workouts['calories_burned'] = df_workouts['duration'] * ((0.4472 * df_workouts['avg_heartbeat']) - (0.1263 * weight) + (0.074 * age) - 20.4022) / 4.184
@@ -234,6 +233,7 @@ def workout_page():
                 df_workouts['calories_burned'] = df_workouts['duration'] * ((0.6309 * df_workouts['avg_heartbeat']) + (0.1988 * weight) + (0.2017 * age) - 55.0969) / 4.184
 
             total_calories_burned = df_workouts['calories_burned'].sum()
+            st.write(df_workouts)
             st.write(f"**Daily Calories Burn Goal:** {calories_goal} calories")
             st.write(f"**Total Calories Burned:** {total_calories_burned:.2f} calories")
             if total_calories_burned >= calories_goal:
