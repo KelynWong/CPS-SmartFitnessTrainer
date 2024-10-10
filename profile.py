@@ -54,10 +54,12 @@ def profile_page():
                 st.subheader("Basic Info")
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    age = st.number_input("Age", value=user_data.get('age', 0), min_value=0)
+                    # Ensure age is treated as an int
+                    age = st.number_input("Age", value=int(user_data.get('age', 0)), min_value=0)
                 
                 with col2:
-                    weight = st.number_input("Weight (kg)", value=user_data.get('weight', 0.0), min_value=0.0)
+                    # Ensure weight is treated as a float
+                    weight = st.number_input("Weight (kg)", value=float(user_data.get('weight', 0.0)), min_value=0.0)
                 
                 with col3:
                     gender = st.selectbox("Gender", options=["Male", "Female"], index=0 if user_data.get('gender') == "Male" else 1)
@@ -66,13 +68,16 @@ def profile_page():
                 st.subheader("Goal Setting")
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    calories_burn = st.number_input("Calories Burn per Day", value=user_data['caloriesBurnPerDay'], min_value=0)
+                    # Ensure calories burn value is treated as an int
+                    calories_burn = st.number_input("Calories Burn per Day", value=int(user_data['caloriesBurnPerDay']), min_value=0)
                 
                 with col2:
-                    workout_duration_per_day = st.number_input("Duration per Workout (in minutes)", value=user_data['workoutDurationPerDay'], min_value=0)
+                    # Ensure workout duration per day is treated as an int
+                    workout_duration_per_day = st.number_input("Duration per Workout (in minutes)", value=int(user_data['workoutDurationPerDay']), min_value=0)
 
                 with col3:
-                    workout_frequency = st.number_input("Workout Frequency per Week", value=user_data['workoutFrequencyPerWeek'], min_value=0)
+                    # Ensure workout frequency per week is treated as an int
+                    workout_frequency = st.number_input("Workout Frequency per Week", value=int(user_data['workoutFrequencyPerWeek']), min_value=0)
 
                 # Submit button for saving changes
                 save_button = st.form_submit_button("Save Changes")
