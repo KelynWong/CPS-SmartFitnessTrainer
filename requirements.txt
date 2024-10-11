@@ -10,3 +10,4 @@ python-socketio
 aiohttp
 uvicorn
 pytz
+streamlit-calendar
