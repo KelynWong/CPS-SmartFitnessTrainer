@@ -6,6 +6,7 @@ import requests
 import time
 from datetime import datetime
 import pytz
+from streamlit_calendar import calendar
 
 # Function to calculate calories burned using the formula based on gender
 def calculate_calories_burned(gender, duration, heart_rate, weight, age):
@@ -204,7 +205,7 @@ def workout_page():
 
         if weight is None or age is None or gender is None:
             st.warning("To provide more accurate analytics, please update your profile with your weight, age, and gender.")
-        else:
+        else: 
             # Calories burned calculation
             avg_heart_rate = df_health.groupby('workout_id')['heartrate'].mean().reset_index(name='avg_heartbeat')
             df_workouts = df_workouts.merge(avg_heart_rate, on='workout_id', how='left')
@@ -270,20 +271,63 @@ def workout_page():
             goal_tracking['met_duration_goal'] = goal_tracking['duration'] >= daily_duration_goal
             goal_tracking['met_calories_goal'] = goal_tracking['calories_burned'] >= calories_goal if calories_goal else False
 
-            # Create a calendar
+            # Prepare calendar events based on the goal tracking results
+            calendar_events = []
             for index, row in goal_tracking.iterrows():
-                date = row['workout_date']
-                met_duration = row['met_duration_goal']
-                met_calories = row['met_calories_goal']
-                
-                if met_duration and met_calories:
-                    st.markdown(f"**{date}**: ✅ Met both goals!")
-                elif met_duration:
-                    st.markdown(f"**{date}**: ✅ Met duration goal but ❌ Did not meet calories goal.")
-                elif met_calories:
-                    st.markdown(f"**{date}**: ✅ Met calories goal but ❌ Did not meet duration goal.")
+                date = row['workout_date'].strftime("%Y-%m-%d")
+                if row['met_duration_goal'] and row['met_calories_goal']:
+                    title = "✅ Met both goals!"
+                elif row['met_duration_goal']:
+                    title = "✅ Met duration goal but ❌ Did not meet calories goal."
+                elif row['met_calories_goal']:
+                    title = "✅ Met calories goal but ❌ Did not meet duration goal."
                 else:
-                    st.markdown(f"**{date}**: ❌ Did not meet any goals.")
+                    title = "❌ Did not meet any goals."
+                
+                calendar_events.append({
+                    "title": title,
+                    "start": f"{date}T00:00:00",
+                    "end": f"{date}T23:59:59",
+                    "resourceId": "a",  # Assuming a single resource for simplicity
+                })
+
+            # Calendar options
+            calendar_options = {
+                "editable": "true",
+                "selectable": "true",
+                "headerToolbar": {
+                    "left": "today prev,next",
+                    "center": "title",
+                    "right": "resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth",
+                },
+                "slotMinTime": "06:00:00",
+                "slotMaxTime": "18:00:00",
+                "initialView": "resourceTimelineDay",
+                "resourceGroupField": "building",
+                "resources": [
+                    {"id": "a", "building": "Goals", "title": "Goals Tracking"},
+                ],
+            }
+
+            # Custom CSS
+            custom_css = """
+                .fc-event-past {
+                    opacity: 0.8;
+                }
+                .fc-event-time {
+                    font-style: italic;
+                }
+                .fc-event-title {
+                    font-weight: 700;
+                }
+                .fc-toolbar-title {
+                    font-size: 2rem;
+                }
+            """
+
+            # Render the calendar
+            calendar = calendar(events=calendar_events, options=calendar_options, custom_css=custom_css)
+            st.write(calendar)
 
             # Workout and health data visualization
             st.subheader(f"Workout Data for {username}")
