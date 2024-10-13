@@ -291,8 +291,8 @@ def workout_page():
                 
                 calendar_events.append({
                     "title": title,
-                    "start": f"{date}T00:00:00",
-                    "end": f"{date}T23:59:59",
+                    "start": date,
+                    "end": date,
                     "resourceId": "a",  # Assuming a single resource for simplicity
                 })
 
@@ -314,8 +314,8 @@ def workout_page():
                 # Stretch this event across the whole week (Monday to Sunday)
                 calendar_events.append({
                     "title": weekly_title,
-                    "start": f"{start_date}T00:00:00",
-                    "end": f"{end_date}T23:59:59",
+                    "start": start_date,
+                    "end": end_date,
                     "resourceId": "a",
                 })
 
