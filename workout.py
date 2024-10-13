@@ -305,8 +305,8 @@ def workout_page():
                 "initialView": "resourceTimelineDay",
                 "resourceGroupField": "building",
                 "resources": [
-                    {"id": "a", "building": "Goals", "title": "Goals Tracking"},
-                ],
+                    {"id": "a", "building": "Goals", "title": "Goals Tracking"}
+                ]
             }
 
             # Custom CSS
@@ -325,9 +325,11 @@ def workout_page():
                 }
             """
 
+            # Create the calendar object
+            calendar_view = calendar(events=calendar_events, options=calendar_options, custom_css=custom_css)
+
             # Render the calendar
-            calendar = calendar(events=calendar_events, options=calendar_options, custom_css=custom_css)
-            st.write(calendar)
+            st.write(calendar_view)
 
             # Workout and health data visualization
             st.subheader(f"Workout Data for {username}")
