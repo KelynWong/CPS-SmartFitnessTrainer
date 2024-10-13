@@ -296,6 +296,29 @@ def workout_page():
                     "resourceId": "a",  # Assuming a single resource for simplicity
                 })
 
+            # Calculate total workouts per week
+            df_workouts['week'] = df_workouts['startDT'].dt.isocalendar().week
+            workouts_per_week = df_workouts.groupby('week').size().reset_index(name='workouts_per_week')
+
+            # Weekly goal tracking
+            for week, group in df_workouts.groupby('week'):
+                start_date = group['startDT'].min().strftime("%Y-%m-%d")
+                end_date = group['endDT'].max().strftime("%Y-%m-%d")
+                num_workouts = group.shape[0]
+                
+                if frequency_goal and num_workouts >= frequency_goal:
+                    weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
+                else:
+                    weekly_title = f"❌ Did not meet weekly workout frequency goal. Only {num_workouts} workouts."
+
+                # Stretch this event across the whole week (Monday to Sunday)
+                calendar_events.append({
+                    "title": weekly_title,
+                    "start": f"{start_date}T00:00:00",
+                    "end": f"{end_date}T23:59:59",
+                    "resourceId": "a",
+                })
+
             # Calendar options
             calendar_options = {
                 "editable": "true",
