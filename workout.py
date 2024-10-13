@@ -236,9 +236,9 @@ def workout_page():
                     st.write(f"**Daily Duration Goal:** {daily_duration_goal} minutes")
                     st.write(f"**Average Workout Duration:** {avg_duration:.2f} minutes")
                     if avg_duration >= daily_duration_goal:
-                        st.success("You are meeting your daily workout duration goal!")
+                        st.success("You are meeting your daily workout duration goal on average!")
                     else:
-                        st.warning("You are not meeting your daily workout duration goal.")
+                        st.warning("You are not meeting your daily workout duration goal on average.")
 
             if col2:
                 # Check weekly frequency goal
@@ -247,9 +247,9 @@ def workout_page():
                     st.write(f"**Weekly Frequency Goal:** {frequency_goal} workouts/week")
                     st.write(f"**Average Workouts Per Week:** {avg_frequency:.2f} workouts/week")
                     if avg_frequency >= frequency_goal:
-                        st.success("You are meeting your weekly workout frequency goal!")
+                        st.success("You are meeting your weekly workout frequency goal on average!")
                     else:
-                        st.warning("You are not meeting your weekly workout frequency goal.")
+                        st.warning("You are not meeting your weekly workout frequency goal on average.")
 
             if col3:
                 # Check daily calories goal and display related metrics
@@ -258,9 +258,9 @@ def workout_page():
                     st.write(f"**Daily Calories Burn Goal:** {calories_goal} calories")
                     st.write(f"**Total Calories Burned:** {total_calories_burned:.2f} calories")
                     if total_calories_burned >= calories_goal:
-                        st.success("You are meeting your daily calories burn goal!")
+                        st.success("You are meeting your daily calories burn goal on average!")
                     else:
-                        st.warning("You are not meeting your daily calories burn goal.")
+                        st.warning("You are not meeting your daily calories burn goal on average.")
                 else:
                     st.warning("Calories burned data is not available. Please ensure your weight, age, and gender are set.")
 
