@@ -225,42 +225,47 @@ def workout_page():
                     55.0969) / 4.184
 
             # Goal Tracking Section
-            st.subheader("Goal Tracking")
+            st.subheader("Overall Goal Tracking")
 
-            # Check daily duration goal
-            if daily_duration_goal:
-                avg_duration = df_workouts['duration'].mean()
-                st.write(f"**Daily Duration Goal:** {daily_duration_goal} minutes")
-                st.write(f"**Average Workout Duration:** {avg_duration:.2f} minutes")
-                if avg_duration >= daily_duration_goal:
-                    st.success("You are meeting your daily workout duration goal!")
-                else:
-                    st.warning("You are not meeting your daily workout duration goal.")
+            col1, col2, col3 = st.columns(3)
 
-            # Check weekly frequency goal
-            if frequency_goal:
-                avg_frequency = workouts_per_week['workouts_per_week'].mean()
-                st.write(f"**Weekly Frequency Goal:** {frequency_goal} workouts/week")
-                st.write(f"**Average Workouts Per Week:** {avg_frequency:.2f} workouts/week")
-                if avg_frequency >= frequency_goal:
-                    st.success("You are meeting your weekly workout frequency goal!")
-                else:
-                    st.warning("You are not meeting your weekly workout frequency goal.")
+            if col1:
+                # Check daily duration goal
+                if daily_duration_goal:
+                    avg_duration = df_workouts['duration'].mean()
+                    st.write(f"**Daily Duration Goal:** {daily_duration_goal} minutes")
+                    st.write(f"**Average Workout Duration:** {avg_duration:.2f} minutes")
+                    if avg_duration >= daily_duration_goal:
+                        st.success("You are meeting your daily workout duration goal!")
+                    else:
+                        st.warning("You are not meeting your daily workout duration goal.")
 
-            # Check daily calories goal and display related metrics
-            if calories_goal and 'calories_burned' in df_workouts.columns:
-                total_calories_burned = df_workouts['calories_burned'].sum()
-                st.write(f"**Daily Calories Burn Goal:** {calories_goal} calories")
-                st.write(f"**Total Calories Burned:** {total_calories_burned:.2f} calories")
-                if total_calories_burned >= calories_goal:
-                    st.success("You are meeting your daily calories burn goal!")
+            if col2:
+                # Check weekly frequency goal
+                if frequency_goal:
+                    avg_frequency = workouts_per_week['workouts_per_week'].mean()
+                    st.write(f"**Weekly Frequency Goal:** {frequency_goal} workouts/week")
+                    st.write(f"**Average Workouts Per Week:** {avg_frequency:.2f} workouts/week")
+                    if avg_frequency >= frequency_goal:
+                        st.success("You are meeting your weekly workout frequency goal!")
+                    else:
+                        st.warning("You are not meeting your weekly workout frequency goal.")
+
+            if col3:
+                # Check daily calories goal and display related metrics
+                if calories_goal and 'calories_burned' in df_workouts.columns:
+                    total_calories_burned = df_workouts['calories_burned'].sum()
+                    st.write(f"**Daily Calories Burn Goal:** {calories_goal} calories")
+                    st.write(f"**Total Calories Burned:** {total_calories_burned:.2f} calories")
+                    if total_calories_burned >= calories_goal:
+                        st.success("You are meeting your daily calories burn goal!")
+                    else:
+                        st.warning("You are not meeting your daily calories burn goal.")
                 else:
-                    st.warning("You are not meeting your daily calories burn goal.")
-            else:
-                st.warning("Calories burned data is not available. Please ensure your weight, age, and gender are set.")
+                    st.warning("Calories burned data is not available. Please ensure your weight, age, and gender are set.")
 
             # Create a calendar to display goal tracking
-            st.subheader("Goal Tracking Calendar")
+            st.subheader("Goal Tracking Calendar view")
 
             # Create a new DataFrame for goal tracking
             goal_tracking = df_workouts.groupby('workout_date').agg({
@@ -276,13 +281,13 @@ def workout_page():
             for index, row in goal_tracking.iterrows():
                 date = row['workout_date'].strftime("%Y-%m-%d")
                 if row['met_duration_goal'] and row['met_calories_goal']:
-                    title = "✅ Met both goals!"
+                    title = "✅ Met both daily workout duration and duration goals!"
                 elif row['met_duration_goal']:
-                    title = "✅ Met duration goal but ❌ Did not meet calories goal."
+                    title = "✅ Met daily workout duration goal but ❌ Did not meet daily calories goal."
                 elif row['met_calories_goal']:
-                    title = "✅ Met calories goal but ❌ Did not meet duration goal."
+                    title = "✅ Met daily calories goal but ❌ Did not meet daily workout duration goal."
                 else:
-                    title = "❌ Did not meet any goals."
+                    title = "❌ Did not meet both daily workout and duration goals."
                 
                 calendar_events.append({
                     "title": title,
