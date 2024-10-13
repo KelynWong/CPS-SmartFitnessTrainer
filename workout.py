@@ -229,7 +229,7 @@ def workout_page():
 
             col1, col2, col3 = st.columns(3)
 
-            if col1:
+            with col1:
                 # Check daily duration goal
                 if daily_duration_goal:
                     avg_duration = df_workouts['duration'].mean()
@@ -240,7 +240,7 @@ def workout_page():
                     else:
                         st.warning("You are not meeting your daily workout duration goal on average.")
 
-            if col2:
+            with col2:
                 # Check weekly frequency goal
                 if frequency_goal:
                     avg_frequency = workouts_per_week['workouts_per_week'].mean()
@@ -251,7 +251,7 @@ def workout_page():
                     else:
                         st.warning("You are not meeting your weekly workout frequency goal on average.")
 
-            if col3:
+            with col3:
                 # Check daily calories goal and display related metrics
                 if calories_goal and 'calories_burned' in df_workouts.columns:
                     total_calories_burned = df_workouts['calories_burned'].sum()
