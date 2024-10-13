@@ -360,30 +360,56 @@ def workout_page():
             st.write(calendar_view)
 
             # Workout and health data visualization
-            st.subheader(f"Workout Data for {username}")
+            st.subheader(f"Raw Workout Data for {username}")
             st.dataframe(df_workouts)
 
-            # Reps over time graph (will always display)
-            col1, col2 = st.columns(2)
-            with col1:
-                fig_reps = px.line(df_workouts, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
-                st.plotly_chart(fig_reps, use_container_width=True)
+            st.subheader("Workout Frequency by Day of the Week")
+            df_workouts['day_of_week'] = df_workouts['startDT'].dt.day_name()
+            fig_frequency = px.bar(df_workouts, x='day_of_week', title='Workout Frequency by Day of the Week')
+            st.plotly_chart(fig_frequency, use_container_width=True)
 
-            # Display calories graph only if weight, age, and gender are set
+            st.subheader("Total Duration per Workout")
+            fig_duration_per_workout = px.bar(df_workouts, x='workout_date', y='duration', title='Total Duration per Workout')
+            st.plotly_chart(fig_duration_per_workout, use_container_width=True)
+
+            # Display calories graph only if weight, age, and gender are set 
             if weight is not None and age is not None and gender is not None:
-                with col2:
                     fig_calories = px.bar(df_workouts, x='workout_date', y='calories_burned', title='Calories Burned per Workout')
                     st.plotly_chart(fig_calories, use_container_width=True)
 
-            # Heart rate trend
+            # Heart rate  
             st.subheader("Heart Rate Analysis")
             fig_heart_rate = px.line(df_health, x='timestamp', y='heartrate', color='workout_id', title='Heart Rate per Workout')
-            st.plotly_chart(fig_heart_rate, use_container_width=True)
+            st.plotly_chart(fig_heart_rate, use_container_width=True)  # Full-width chart
+            
+            st.subheader("Average Heart Rate per Workout")
+            avg_heart_rate = df_health.groupby('workout_id')['heartrate'].mean().reset_index()
+            df_workouts_avg_hr = df_workouts.merge(avg_heart_rate, on='workout_id', how='left')
+            fig_avg_hr = px.line(df_workouts_avg_hr, x='startDT', y='heartrate', title='Average Heart Rate per Workout')
+            st.plotly_chart(fig_avg_hr, use_container_width=True)
 
-            # Workout duration over time
+            st.subheader("Heart Rate Distribution")
+            fig_hr_distribution = px.histogram(df_health, x='heartrate', nbins=50, title='Heart Rate Distribution')
+            st.plotly_chart(fig_hr_distribution, use_container_width=True)
+
+            st.subheader("Workout Intensity Analysis")
+            fig_intensity = px.box(df_health, x='workout_id', y='heartrate', title='Workout Intensity Distribution (Heart Rate)')
+            st.plotly_chart(fig_intensity, use_container_width=True)
+
+            st.subheader("Over time trends")
+            # Workout duration over time 
             st.subheader("Workout Duration Analysis")
             fig_duration = px.line(df_workouts, x='startDT', y='duration', title='Workout Duration Over Time', markers=True)
-            st.plotly_chart(fig_duration, use_container_width=True)
+            st.plotly_chart(fig_duration, use_container_width=True)  # Full-width chart
+
+            # Reps over time graph 
+            fig_reps = px.line(df_workouts, x='startDT', y='reps', title='Total Reps Over Time', markers=True)
+            st.plotly_chart(fig_reps, use_container_width=True)
+
+            st.subheader("Calories Burned Over Time")
+            fig_calories_line = px.line(df_workouts, x='workout_date', y='calories_burned', title='Calories Burned Over Time', markers=True)
+            st.plotly_chart(fig_calories_line, use_container_width=True)
+
 
     else:
         st.warning("No workout data found for the current user.")
