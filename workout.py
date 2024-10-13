@@ -298,11 +298,11 @@ def workout_page():
                 "headerToolbar": {
                     "left": "today prev,next",
                     "center": "title",
-                    "right": "resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth",
+                    "right": "dayGridMonth,timeGridWeek,timeGridDay",
                 },
                 "slotMinTime": "06:00:00",
                 "slotMaxTime": "18:00:00",
-                "initialView": "resourceTimelineDay",
+                "initialView": "dayGridMonth",
                 "resourceGroupField": "building",
                 "resources": [
                     {"id": "a", "building": "Goals", "title": "Goals Tracking"}
