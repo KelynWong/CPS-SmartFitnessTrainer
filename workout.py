@@ -298,7 +298,7 @@ def workout_page():
                 "headerToolbar": {
                     "left": "today prev,next",
                     "center": "title",
-                    "right": "dayGridMonth,timeGridWeek,timeGridDay",
+                    "right": "dayGridMonth,dayGridWeek,dayGridDay",
                 },
                 "slotMinTime": "06:00:00",
                 "slotMaxTime": "18:00:00",
