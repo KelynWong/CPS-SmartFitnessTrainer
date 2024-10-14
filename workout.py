@@ -375,6 +375,7 @@ def workout_page():
                 "slotMaxTime": "18:00:00",
                 "initialView": "dayGridMonth",
                 "resourceGroupField": "building",
+                "firstDay": 1,
                 "resources": [
                     {"id": "a", "building": "Goals", "title": "Goals Tracking"}
                 ]
