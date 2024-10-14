@@ -328,18 +328,24 @@ def workout_page():
                 })
 
 
+            # Get a list of all Mondays (start of the week) for the whole year until today
+            all_weeks = pd.date_range(start=start_of_year, end=today, freq='W-MON')
+
             # Calculate total workouts per week
             df_workouts['week'] = df_workouts['startDT'].dt.isocalendar().week
             df_workouts['year'] = df_workouts['startDT'].dt.isocalendar().year
 
+            # Group workouts by year and week
             workouts_per_week = df_workouts.groupby(['year', 'week']).size().reset_index(name='workouts_per_week')
 
-            # Weekly goal tracking
-            for (year, week), group in df_workouts.groupby(['year', 'week']):
-                # Get the start (Monday) and end (Sunday) of the week
-                start_of_week = pd.to_datetime(f'{year}-W{week}-1', format="%Y-W%W-%w")
-                end_of_week = start_of_week + pd.Timedelta(days=7)
+            # Weekly goal tracking for all weeks in the year
+            for start_of_week in all_weeks:
+                # Get the year and week number for this Monday
+                year, week = start_of_week.year, start_of_week.isocalendar().week
+                end_of_week = start_of_week + pd.Timedelta(days=6)  # End of the week is Sunday
 
+                # Check if this week has any workouts
+                group = df_workouts[(df_workouts['year'] == year) & (df_workouts['week'] == week)]
                 num_workouts = group.shape[0]
 
                 if num_workouts > 0:
@@ -353,7 +359,7 @@ def workout_page():
                     weekly_title = "❌ No workouts for this week."
                     weekly_background_color = "red"
 
-                # Stretch this event across the whole week (Monday to Sunday)
+                # Add the event to the calendar, stretching it across the week (Monday to Sunday)
                 calendar_events.append({
                     "title": weekly_title,
                     "start": start_of_week.strftime("%Y-%m-%d"),
