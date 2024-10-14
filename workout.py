@@ -304,7 +304,7 @@ def workout_page():
                 
                 # Determine the status of the goals and set the appropriate message and background color
                 if row['duration'] == 0 and row['calories_burned'] == 0:
-                    title = "No workouts"
+                    title = "No workouts :("
                     background_color = "gray"
                 elif row['met_duration_goal'] and row['met_calories_goal']:
                     title = "✅ Met both daily workout duration and calorie goals!"
@@ -342,7 +342,7 @@ def workout_page():
             for start_of_week in all_weeks:
                 # Get the year and week number for this Monday
                 year, week = start_of_week.year, start_of_week.isocalendar().week
-                end_of_week = start_of_week + pd.Timedelta(days=6)  # End of the week is Sunday
+                end_of_week = start_of_week + pd.Timedelta(days=7) 
 
                 # Check if this week has any workouts
                 group = df_workouts[(df_workouts['year'] == year) & (df_workouts['week'] == week)]
@@ -356,8 +356,8 @@ def workout_page():
                         weekly_title = f"❌ Did not fully meet weekly workout frequency goal. Only {num_workouts} workouts."
                         weekly_background_color = "yellow"
                 else:
-                    weekly_title = "❌ No workouts for this week."
-                    weekly_background_color = "red"
+                    weekly_title = "No workouts for this week :("
+                    weekly_background_color = "grey"
 
                 # Add the event to the calendar, stretching it across the week (Monday to Sunday)
                 calendar_events.append({
