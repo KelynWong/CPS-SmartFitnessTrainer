@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import requests
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from streamlit_calendar import calendar
 
@@ -264,15 +264,30 @@ def workout_page():
                 else:
                     st.warning("Calories burned data is not available. Please ensure your weight, age, and gender are set.")
 
-            # Create a calendar to display goal tracking
-            st.subheader("Goal Tracking Calendar view")
+            # Workout and health data visualization
+            st.subheader("Goal Tracking Calendar View")
 
-            # Create a new DataFrame for goal tracking
-            goal_tracking = df_workouts.groupby('workout_date').agg({
+            # Get the current year
+            today = datetime.today()
+            start_of_year = datetime(today.year, 1, 1)
+
+            # Create a date range from the start of the year until today
+            date_range = pd.date_range(start=start_of_year, end=today)
+
+            # Create a new DataFrame for goal tracking based on the date range
+            goal_tracking = pd.DataFrame(date_range, columns=['workout_date'])
+
+            # Merge with the existing workout data to track goals
+            goal_tracking = goal_tracking.merge(df_workouts.groupby('workout_date').agg({
                 'duration': 'mean', 
                 'calories_burned': 'sum'
-            }).reset_index()
+            }).reset_index(), on='workout_date', how='left')
 
+            # Fill missing workout data with zeros or NaNs
+            goal_tracking['duration'].fillna(0, inplace=True)
+            goal_tracking['calories_burned'].fillna(0, inplace=True)
+
+            # Track if the daily goals were met or not
             goal_tracking['met_duration_goal'] = goal_tracking['duration'] >= daily_duration_goal
             goal_tracking['met_calories_goal'] = goal_tracking['calories_burned'] >= calories_goal if calories_goal else False
 
@@ -280,20 +295,30 @@ def workout_page():
             calendar_events = []
             for index, row in goal_tracking.iterrows():
                 date = row['workout_date'].strftime("%Y-%m-%d")
-                if row['met_duration_goal'] and row['met_calories_goal']:
-                    title = "✅ Met both daily workout duration and duration goals!"
+                
+                # Determine the status of the goals and set the appropriate message and background color
+                if row['duration'] == 0 and row['calories_burned'] == 0:
+                    title = "No workouts"
+                    background_color = "gray"
+                elif row['met_duration_goal'] and row['met_calories_goal']:
+                    title = "✅ Met both daily workout duration and calorie goals!"
+                    background_color = "green"
                 elif row['met_duration_goal']:
-                    title = "✅ Met daily workout duration goal but ❌ Did not meet daily calories goal."
+                    title = "✅ Met daily workout duration goal but ❌ did not meet daily calorie goal."
+                    background_color = "yellow"
                 elif row['met_calories_goal']:
-                    title = "✅ Met daily calories goal but ❌ Did not meet daily workout duration goal."
+                    title = "✅ Met daily calorie goal but ❌ did not meet daily workout duration goal."
+                    background_color = "yellow"
                 else:
-                    title = "❌ Did not meet both daily workout and duration goals."
+                    title = "❌ Did not meet either daily workout or calorie goals."
+                    background_color = "red"
                 
                 calendar_events.append({
                     "title": title,
                     "start": date,
                     "end": date,
                     "resourceId": "a",  # Assuming a single resource for simplicity
+                    "backgroundColor": background_color  # Set background color for the event
                 })
 
             # Calculate total workouts per week
@@ -305,11 +330,13 @@ def workout_page():
                 start_date = group['startDT'].min().strftime("%Y-%m-%d")
                 end_date = group['endDT'].max().strftime("%Y-%m-%d")
                 num_workouts = group.shape[0]
-                
+
                 if frequency_goal and num_workouts >= frequency_goal:
                     weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
+                    weekly_background_color = "green"
                 else:
                     weekly_title = f"❌ Did not meet weekly workout frequency goal. Only {num_workouts} workouts."
+                    weekly_background_color = "red"
 
                 # Stretch this event across the whole week (Monday to Sunday)
                 calendar_events.append({
@@ -317,6 +344,7 @@ def workout_page():
                     "start": start_date,
                     "end": end_date,
                     "resourceId": "a",
+                    "backgroundColor": weekly_background_color  # Set background color for the event
                 })
 
             # Calendar options
@@ -337,7 +365,7 @@ def workout_page():
                 ]
             }
 
-            # Custom CSS
+            # Custom CSS for calendar styling
             custom_css = """
                 .fc-event-past {
                     opacity: 0.8;
@@ -350,6 +378,9 @@ def workout_page():
                 }
                 .fc-toolbar-title {
                     font-size: 2rem;
+                }
+                .fc-event { 
+                    background-color: var(--fc-event-background-color); 
                 }
             """
 
