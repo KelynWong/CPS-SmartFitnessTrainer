@@ -370,8 +370,8 @@ def workout_page():
 
             # Calendar options
             calendar_options = {
-                "editable": "true",
-                "selectable": "true",
+                "editable": "false",
+                "selectable": "false",
                 "headerToolbar": {
                     "left": "today prev,next",
                     "center": "title",
