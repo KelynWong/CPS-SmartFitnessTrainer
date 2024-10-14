@@ -327,17 +327,18 @@ def workout_page():
                     "backgroundColor": background_color  # Set background color for the event
                 })
 
-                # Calculate total workouts per week
-                df_workouts['week'] = df_workouts['startDT'].dt.isocalendar().week
-                df_workouts['year'] = df_workouts['startDT'].dt.isocalendar().year
 
-                workouts_per_week = df_workouts.groupby(['year', 'week']).size().reset_index(name='workouts_per_week')
+            # Calculate total workouts per week
+            df_workouts['week'] = df_workouts['startDT'].dt.isocalendar().week
+            df_workouts['year'] = df_workouts['startDT'].dt.isocalendar().year
+
+            workouts_per_week = df_workouts.groupby(['year', 'week']).size().reset_index(name='workouts_per_week')
 
             # Weekly goal tracking
             for (year, week), group in df_workouts.groupby(['year', 'week']):
                 # Get the start (Monday) and end (Sunday) of the week
                 start_of_week = pd.to_datetime(f'{year}-W{week}-1', format="%Y-W%W-%w")
-                end_of_week = start_of_week + pd.Timedelta(days=6)
+                end_of_week = start_of_week + pd.Timedelta(days=7)
 
                 num_workouts = group.shape[0]
 
@@ -346,8 +347,8 @@ def workout_page():
                         weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
                         weekly_background_color = "green"
                     else:
-                        weekly_title = f"❌ Did not meet weekly workout frequency goal. Only {num_workouts} workouts."
-                        weekly_background_color = "red"
+                        weekly_title = f"❌ Did not fully meet weekly workout frequency goal. Only {num_workouts} workouts."
+                        weekly_background_color = "yellow"
                 else:
                     weekly_title = "❌ No workouts for this week."
                     weekly_background_color = "red"
