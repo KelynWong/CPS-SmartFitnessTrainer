@@ -268,21 +268,26 @@ def workout_page():
             st.subheader("Goal Tracking Calendar View")
 
             # Get the current year
-            today = datetime.today()
-            start_of_year = datetime(today.year, 1, 1)
+            today = pd.Timestamp.today()
+            start_of_year = pd.Timestamp(today.year, 1, 1)
 
-            # Create a date range from the start of the year until today
+            # Create a date range from the start of the year to today
             date_range = pd.date_range(start=start_of_year, end=today)
 
-            # Convert 'workout_date' columns to datetime format in both DataFrames
-            goal_tracking['workout_date'] = pd.to_datetime(goal_tracking['workout_date'])
-            df_workouts['workout_date'] = pd.to_datetime(df_workouts['workout_date'])
+            # Ensure the date_range is not empty
+            if len(date_range) > 0:
+                # Create a new DataFrame for goal tracking based on the date range
+                goal_tracking = pd.DataFrame(date_range, columns=['workout_date'])
 
-            # Proceed with the merge
-            goal_tracking = goal_tracking.merge(df_workouts.groupby('workout_date').agg({
-                'duration': 'mean', 
-                'calories_burned': 'sum'
-            }).reset_index(), on='workout_date', how='left')
+                # Convert 'workout_date' to datetime in both DataFrames to avoid merge errors
+                goal_tracking['workout_date'] = pd.to_datetime(goal_tracking['workout_date'])
+                df_workouts['workout_date'] = pd.to_datetime(df_workouts['workout_date'])
+
+                # Merge with the existing workout data to track goals
+                goal_tracking = goal_tracking.merge(df_workouts.groupby('workout_date').agg({
+                    'duration': 'mean', 
+                    'calories_burned': 'sum'
+                }).reset_index(), on='workout_date', how='left')
 
             # Fill missing workout data with zeros or NaNs
             goal_tracking['duration'].fillna(0, inplace=True)
