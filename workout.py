@@ -412,6 +412,15 @@ def workout_page():
                 .fc-daygrid-day-frame {
                     min-height: 20px; /* Adjust this value to decrease cell height */
                 }
+                .fc-event-title {
+                    white-space: normal !important; /* Allow text to wrap */
+                    word-wrap: break-word; /* Break long words if necessary */
+                    font-size: 0.9em; /* Optional: Make the text slightly smaller */
+                    line-height: 1.2em; /* Optional: Adjust the line height */
+                }
+                .fc-daygrid-event {
+                    height: auto !important; /* Allow the height to adjust to content */
+                }
             """
 
             # Create the calendar object
