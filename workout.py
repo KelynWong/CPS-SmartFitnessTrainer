@@ -377,33 +377,20 @@ def workout_page():
 
             # Custom CSS for calendar styling
             custom_css = """
-                /* Reduce calendar event font size */
+                .fc-event-past {
+                    opacity: 0.8;
+                }
+                .fc-event-time {
+                    font-style: italic;
+                }
                 .fc-event-title {
-                    font-size: 0.8rem; /* Make event titles smaller */
+                    font-weight: 700;
                 }
-
-                /* Reduce height of calendar cells */
-                .fc-daygrid-day-frame {
-                    min-height: 30px; /* Adjust this value to decrease cell height */
-                }
-
-                /* Reduce padding inside each cell */
-                .fc-daygrid-day-top, .fc-daygrid-day-events {
-                    padding: 2px !important; /* Adjust this to reduce padding */
-                }
-
-                /* Reduce overall font size of the calendar */
-                .fc {
-                    font-size: 0.9rem;
-                }
-
-                /* Reduce toolbar (header) size */
                 .fc-toolbar-title {
-                    font-size: 1.2rem;
+                    font-size: 2rem;
                 }
-
-                .fc-toolbar button {
-                    font-size: 0.8rem;
+                .fc-event { 
+                    background-color: var(--fc-event-background-color); 
                 }
             """
 
