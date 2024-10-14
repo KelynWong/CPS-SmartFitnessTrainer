@@ -333,29 +333,33 @@ def workout_page():
 
                 workouts_per_week = df_workouts.groupby(['year', 'week']).size().reset_index(name='workouts_per_week')
 
-                # Weekly goal tracking
-                for (year, week), group in df_workouts.groupby(['year', 'week']):
-                    # Get the start (Monday) and end (Sunday) of the week
-                    start_of_week = pd.to_datetime(f'{year}-W{week}-1', format="%Y-W%W-%w")
-                    end_of_week = start_of_week + pd.Timedelta(days=6)
+            # Weekly goal tracking
+            for (year, week), group in df_workouts.groupby(['year', 'week']):
+                # Get the start (Monday) and end (Sunday) of the week
+                start_of_week = pd.to_datetime(f'{year}-W{week}-1', format="%Y-W%W-%w")
+                end_of_week = start_of_week + pd.Timedelta(days=6)
 
-                    num_workouts = group.shape[0]
+                num_workouts = group.shape[0]
 
+                if num_workouts > 0:
                     if frequency_goal and num_workouts >= frequency_goal:
                         weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
                         weekly_background_color = "green"
                     else:
                         weekly_title = f"❌ Did not meet weekly workout frequency goal. Only {num_workouts} workouts."
                         weekly_background_color = "red"
+                else:
+                    weekly_title = "❌ No workouts for this week."
+                    weekly_background_color = "red"
 
-                    # Stretch this event across the whole week (Monday to Sunday)
-                    calendar_events.append({
-                        "title": weekly_title,
-                        "start": start_of_week.strftime("%Y-%m-%d"),
-                        "end": end_of_week.strftime("%Y-%m-%d"),
-                        "resourceId": "a",
-                        "backgroundColor": weekly_background_color  # Set background color for the event
-                    })
+                # Stretch this event across the whole week (Monday to Sunday)
+                calendar_events.append({
+                    "title": weekly_title,
+                    "start": start_of_week.strftime("%Y-%m-%d"),
+                    "end": end_of_week.strftime("%Y-%m-%d"),
+                    "resourceId": "a",
+                    "backgroundColor": weekly_background_color  # Set background color for the event
+                })
 
             # Calendar options
             calendar_options = {
@@ -377,20 +381,33 @@ def workout_page():
 
             # Custom CSS for calendar styling
             custom_css = """
-                .fc-event-past {
-                    opacity: 0.8;
-                }
-                .fc-event-time {
-                    font-style: italic;
-                }
+                /* Reduce calendar event font size */
                 .fc-event-title {
-                    font-weight: 700;
+                    font-size: 0.8rem; /* Make event titles smaller */
                 }
+
+                /* Reduce height of calendar cells */
+                .fc-daygrid-day-frame {
+                    min-height: 30px; /* Adjust this value to decrease cell height */
+                }
+
+                /* Reduce padding inside each cell */
+                .fc-daygrid-day-top, .fc-daygrid-day-events {
+                    padding: 2px !important; /* Adjust this to reduce padding */
+                }
+
+                /* Reduce overall font size of the calendar */
+                .fc {
+                    font-size: 0.9rem;
+                }
+
+                /* Reduce toolbar (header) size */
                 .fc-toolbar-title {
-                    font-size: 2rem;
+                    font-size: 1.2rem;
                 }
-                .fc-event { 
-                    background-color: var(--fc-event-background-color); 
+
+                .fc-toolbar button {
+                    font-size: 0.8rem;
                 }
             """
 
