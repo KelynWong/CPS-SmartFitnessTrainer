@@ -336,9 +336,9 @@ def workout_page():
                 # Weekly goal tracking
                 for (year, week), group in df_workouts.groupby(['year', 'week']):
                     # Get the start (Monday) and end (Sunday) of the week
-                    start_of_week = pd.Timestamp.strptime(f'{year}-W{week}-1', "%Y-W%W-%w")  # Monday of the week
-                    end_of_week = start_of_week + pd.Timedelta(days=6)  # Sunday of the same week
-                    
+                    start_of_week = pd.to_datetime(f'{year}-W{week}-1', format="%Y-W%W-%w")
+                    end_of_week = start_of_week + pd.Timedelta(days=6)
+
                     num_workouts = group.shape[0]
 
                     if frequency_goal and num_workouts >= frequency_goal:
@@ -377,20 +377,33 @@ def workout_page():
 
             # Custom CSS for calendar styling
             custom_css = """
-                .fc-event-past {
-                    opacity: 0.8;
-                }
-                .fc-event-time {
-                    font-style: italic;
-                }
+                /* Reduce calendar event font size */
                 .fc-event-title {
-                    font-weight: 700;
+                    font-size: 0.8rem; /* Make event titles smaller */
                 }
+
+                /* Reduce height of calendar cells */
+                .fc-daygrid-day-frame {
+                    min-height: 30px; /* Adjust this value to decrease cell height */
+                }
+
+                /* Reduce padding inside each cell */
+                .fc-daygrid-day-top, .fc-daygrid-day-events {
+                    padding: 2px !important; /* Adjust this to reduce padding */
+                }
+
+                /* Reduce overall font size of the calendar */
+                .fc {
+                    font-size: 0.9rem;
+                }
+
+                /* Reduce toolbar (header) size */
                 .fc-toolbar-title {
-                    font-size: 2rem;
+                    font-size: 1.2rem;
                 }
-                .fc-event { 
-                    background-color: var(--fc-event-background-color); 
+
+                .fc-toolbar button {
+                    font-size: 0.8rem;
                 }
             """
 
