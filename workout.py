@@ -327,31 +327,35 @@ def workout_page():
                     "backgroundColor": background_color  # Set background color for the event
                 })
 
-            # Calculate total workouts per week
-            df_workouts['week'] = df_workouts['startDT'].dt.isocalendar().week
-            workouts_per_week = df_workouts.groupby('week').size().reset_index(name='workouts_per_week')
+                # Calculate total workouts per week
+                df_workouts['week'] = df_workouts['startDT'].dt.isocalendar().week
+                df_workouts['year'] = df_workouts['startDT'].dt.isocalendar().year
 
-            # Weekly goal tracking
-            for week, group in df_workouts.groupby('week'):
-                start_date = group['startDT'].min().strftime("%Y-%m-%d")
-                end_date = group['endDT'].max().strftime("%Y-%m-%d")
-                num_workouts = group.shape[0]
+                workouts_per_week = df_workouts.groupby(['year', 'week']).size().reset_index(name='workouts_per_week')
 
-                if frequency_goal and num_workouts >= frequency_goal:
-                    weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
-                    weekly_background_color = "green"
-                else:
-                    weekly_title = f"❌ Did not meet weekly workout frequency goal. Only {num_workouts} workouts."
-                    weekly_background_color = "red"
+                # Weekly goal tracking
+                for (year, week), group in df_workouts.groupby(['year', 'week']):
+                    # Get the start (Monday) and end (Sunday) of the week
+                    start_of_week = pd.Timestamp.strptime(f'{year}-W{week}-1', "%Y-W%W-%w")  # Monday of the week
+                    end_of_week = start_of_week + pd.Timedelta(days=6)  # Sunday of the same week
+                    
+                    num_workouts = group.shape[0]
 
-                # Stretch this event across the whole week (Monday to Sunday)
-                calendar_events.append({
-                    "title": weekly_title,
-                    "start": start_date,
-                    "end": end_date,
-                    "resourceId": "a",
-                    "backgroundColor": weekly_background_color  # Set background color for the event
-                })
+                    if frequency_goal and num_workouts >= frequency_goal:
+                        weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
+                        weekly_background_color = "green"
+                    else:
+                        weekly_title = f"❌ Did not meet weekly workout frequency goal. Only {num_workouts} workouts."
+                        weekly_background_color = "red"
+
+                    # Stretch this event across the whole week (Monday to Sunday)
+                    calendar_events.append({
+                        "title": weekly_title,
+                        "start": start_of_week.strftime("%Y-%m-%d"),
+                        "end": end_of_week.strftime("%Y-%m-%d"),
+                        "resourceId": "a",
+                        "backgroundColor": weekly_background_color  # Set background color for the event
+                    })
 
             # Calendar options
             calendar_options = {
