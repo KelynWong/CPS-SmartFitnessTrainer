@@ -274,10 +274,11 @@ def workout_page():
             # Create a date range from the start of the year until today
             date_range = pd.date_range(start=start_of_year, end=today)
 
-            # Create a new DataFrame for goal tracking based on the date range
-            goal_tracking = pd.DataFrame(date_range, columns=['workout_date'])
+            # Convert 'workout_date' columns to datetime format in both DataFrames
+            goal_tracking['workout_date'] = pd.to_datetime(goal_tracking['workout_date'])
+            df_workouts['workout_date'] = pd.to_datetime(df_workouts['workout_date'])
 
-            # Merge with the existing workout data to track goals
+            # Proceed with the merge
             goal_tracking = goal_tracking.merge(df_workouts.groupby('workout_date').agg({
                 'duration': 'mean', 
                 'calories_burned': 'sum'
