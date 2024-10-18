@@ -24,8 +24,8 @@ def workout_page():
     .sidebar-link {
         font-size: 18px;
         font-weight: bold;
-        color: #3498db;
-        text-decoration: none;
+        color: white;  /* Set text color to white */
+        text-decoration: none;  /* Remove underline */
         padding: 10px 15px;
         display: block;
         margin-bottom: 10px;
@@ -36,6 +36,7 @@ def workout_page():
     .sidebar-link:hover {
         background-color: #3498db;
         color: white;
+        text-decoration: none;  /* Ensure no underline on hover */
     }
     
     .sidebar-link:active {
@@ -57,7 +58,7 @@ def workout_page():
     st.sidebar.markdown('<a href="#workout-analysis" class="sidebar-link">Workout Analysis</a>', unsafe_allow_html=True)
     st.sidebar.markdown('<a href="#heart-rate-analysis" class="sidebar-link">Heart Rate Analysis</a>', unsafe_allow_html=True)
     st.sidebar.markdown('<a href="#over-time-trend-analysis" class="sidebar-link">Over Time Trend Analysis</a>', unsafe_allow_html=True)
-    
+
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
