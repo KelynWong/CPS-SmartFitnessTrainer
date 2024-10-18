@@ -24,8 +24,8 @@ def workout_page():
     # Show navigation links
     st.sidebar.markdown("[Overall Goal Tracking](#overall-goal-tracking)")
     st.sidebar.markdown("[Goal Tracking Calender](#goal-tracking-calendar-view)")
-    st.sidebar.markdown("[Raw Workout Data](#workout-data)")
-    st.sidebar.markdown("[Workout Analysis](#health-analysis)")
+    st.sidebar.markdown("[Raw Workout Data](#raw-workout-data)")
+    st.sidebar.markdown("[Workout Analysis](#heart-rate-analysis)")
     st.sidebar.markdown("[Heart Rate Analysis](#heart-rate-analysis)")
     st.sidebar.markdown("[Over Time Trend Analysis](#over-time-trend-analysis)")
 
@@ -438,7 +438,7 @@ def workout_page():
             st.write(calendar_view)
 
             # Workout and health data visualization
-            st.subheader(f"Raw Workout Data for {username}")
+            st.subheader(f"Raw Workout Data")
             st.dataframe(df_workouts)
 
             st.subheader("Workout Analysis")
