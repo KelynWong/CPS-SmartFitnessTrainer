@@ -21,6 +21,14 @@ def workout_page():
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
+    # Show navigation links
+    st.sidebar.markdown("[Overall Goal Tracking](#overall-goal-tracking)")
+    st.sidebar.markdown("[Goal Tracking Calender](#goal-tracking-calendar-view)")
+    st.sidebar.markdown("[Raw Workout Data](#workout-data)")
+    st.sidebar.markdown("[Workout Analysis](#health-analysis)")
+    st.sidebar.markdown("[Heart Rate Analysis](#heart-rate-analysis)")
+    st.sidebar.markdown("[Over Time Trend Analysis](#over-time-trend-analysis)")
+
     # Ensure 'startDT' is initialized in session state
     if 'startDT' not in st.session_state:
         st.session_state['startDT'] = None
