@@ -18,16 +18,48 @@ def calculate_calories_burned(gender, duration, heart_rate, weight, age):
         return 0  # Return 0 if gender is not valid
 
 def workout_page():
+    st.markdown("""
+    <style>
+    /* Styling for the sidebar links */
+    .sidebar-link {
+        font-size: 18px;
+        font-weight: bold;
+        color: #3498db;
+        text-decoration: none;
+        padding: 10px 15px;
+        display: block;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .sidebar-link:hover {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .sidebar-link:active {
+        background-color: #2980b9;
+        color: white;
+    }
+
+    /* Custom styles for the sidebar header */
+    .sidebar .sidebar-content {
+        padding-top: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Sidebar content with styled links
+    st.sidebar.markdown('<a href="#overall-goal-tracking" class="sidebar-link">Overall Goal Tracking</a>', unsafe_allow_html=True)
+    st.sidebar.markdown('<a href="#goal-tracking-calendar-view" class="sidebar-link">Goal Tracking Calendar</a>', unsafe_allow_html=True)
+    st.sidebar.markdown('<a href="#raw-workout-data" class="sidebar-link">Raw Workout Data</a>', unsafe_allow_html=True)
+    st.sidebar.markdown('<a href="#workout-analysis" class="sidebar-link">Workout Analysis</a>', unsafe_allow_html=True)
+    st.sidebar.markdown('<a href="#heart-rate-analysis" class="sidebar-link">Heart Rate Analysis</a>', unsafe_allow_html=True)
+    st.sidebar.markdown('<a href="#over-time-trend-analysis" class="sidebar-link">Over Time Trend Analysis</a>', unsafe_allow_html=True)
+    
     # Initialize Supabase client
     supabase_client = supabase.create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
-
-    # Show navigation links
-    st.sidebar.markdown("[Overall Goal Tracking](#overall-goal-tracking)")
-    st.sidebar.markdown("[Goal Tracking Calender](#goal-tracking-calendar-view)")
-    st.sidebar.markdown("[Raw Workout Data](#raw-workout-data)")
-    st.sidebar.markdown("[Workout Analysis](#heart-rate-analysis)")
-    st.sidebar.markdown("[Heart Rate Analysis](#heart-rate-analysis)")
-    st.sidebar.markdown("[Over Time Trend Analysis](#over-time-trend-analysis)")
 
     # Ensure 'startDT' is initialized in session state
     if 'startDT' not in st.session_state:
