@@ -548,24 +548,24 @@ def workout_page():
                     st.plotly_chart(fig_calories, use_container_width=True)
 
             st.subheader("Workout Performance Analysis")
-            # Line chart of workout_date vs overallAccuracy, colored by workout_type
-            fig_accuracy = px.line(df_workouts, x='workout_date', y='overallAccuracy', color='workout_type', 
+            # Line chart of workout_date vs overallAccuracy, colored by workout
+            fig_accuracy = px.line(df_workouts, x='workout_date', y='overallAccuracy', color='workout', 
                                 title='Form Accuracy Over Time by Workout Type')
             st.plotly_chart(fig_accuracy, use_container_width=True)
 
-            # Box plot comparing workout_type against duration, calories_burned, or overallAccuracy
-            fig_comparison = px.box(df_workouts, x='workout_type', y='duration', title='Workout Type vs Duration')
+            # Box plot comparing workout against duration, calories_burned, or overallAccuracy
+            fig_comparison = px.box(df_workouts, x='workout', y='duration', title='Workout Type vs Duration')
             st.plotly_chart(fig_comparison, use_container_width=True)
 
             # You can create similar box plots for calories_burned and overallAccuracy:
-            fig_calories = px.box(df_workouts, x='workout_type', y='calories_burned', title='Workout Type vs Calories Burned')
+            fig_calories = px.box(df_workouts, x='workout', y='calories_burned', title='Workout Type vs Calories Burned')
             st.plotly_chart(fig_calories, use_container_width=True)
 
-            fig_accuracy_comparison = px.box(df_workouts, x='workout_type', y='overallAccuracy', title='Workout Type vs Accuracy')
+            fig_accuracy_comparison = px.box(df_workouts, x='workout', y='overallAccuracy', title='Workout Type vs Accuracy')
             st.plotly_chart(fig_accuracy_comparison, use_container_width=True)
 
-            # Scatter plot of reps vs duration, colored by workout_type
-            fig_reps_duration = px.scatter(df_workouts, x='reps', y='duration', color='workout_type', 
+            # Scatter plot of reps vs duration, colored by workout
+            fig_reps_duration = px.scatter(df_workouts, x='reps', y='duration', color='workout', 
                                         title='Reps vs Duration')
             st.plotly_chart(fig_reps_duration, use_container_width=True)
 
