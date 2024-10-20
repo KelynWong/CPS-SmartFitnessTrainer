@@ -375,35 +375,36 @@ def workout_page():
                 })
 
             
-                # Add workout streak progression to the calendar
-                goal_tracking['worked_out'] = goal_tracking['duration'] > 0
-                goal_tracking['day_diff'] = goal_tracking['workout_date'].diff().dt.days.fillna(0)
+            # Add workout streak progression to the calendar
+            goal_tracking['worked_out'] = goal_tracking['duration'] > 0
+            goal_tracking['day_diff'] = goal_tracking['workout_date'].diff().dt.days.fillna(0)
 
-                # Define a streak where the difference between days is 1 (consecutive days)
-                goal_tracking['is_streak'] = (goal_tracking['day_diff'] == 1) & goal_tracking['worked_out']
+            # Define a streak where the difference between days is 1 (consecutive days)
+            goal_tracking['is_streak'] = (goal_tracking['day_diff'] == 1) & goal_tracking['worked_out']
 
-                # Initialize streak tracking
-                streak_length = 0
-                previous_streak_end = None
+            # Initialize streak tracking
+            streak_length = 0
+            previous_streak_end = None
 
-                # Iterate through the goal_tracking DataFrame
-                for index, row in goal_tracking.iterrows():
-                    if row['worked_out']:
-                        streak_length += 1
-                        # Check if the next day breaks the streak or if this is the last day in the DataFrame
-                        if index == len(goal_tracking) - 1 or not goal_tracking.iloc[index + 1]['worked_out']:
-                            # This is the end of the current streak, append the event only here
-                            calendar_events.append({
-                                "title": f"🔥 Workout streak: {streak_length} days!",
-                                "start": row['workout_date'].strftime("%Y-%m-%d"),
-                                "end": row['workout_date'].strftime("%Y-%m-%d"),
-                                "resourceId": "a",
-                                "backgroundColor": "orange"
-                            })
-                            # Reset streak length after adding the event
-                            streak_length = 0
-                    else:
-                        streak_length = 0  # Reset streak if there's no workout on that day
+            # Iterate through the goal_tracking DataFrame
+            for index, row in goal_tracking.iterrows():
+                if row['worked_out']:
+                    streak_length += 1
+                    # Check if the next day breaks the streak or if this is the last day in the DataFrame
+                    if index == len(goal_tracking) - 1 or not goal_tracking.iloc[index + 1]['worked_out']:
+                        # This is the end of the current streak, append the event only here
+                        calendar_events.append({
+                            "title": f"🔥 Workout streak: {streak_length} days!",
+                            "start": row['workout_date'].strftime("%Y-%m-%d"),
+                            "end": row['workout_date'].strftime("%Y-%m-%d"),
+                            "resourceId": "a",
+                            "backgroundColor": "orange"
+                        })
+                        # Reset streak length after adding the event
+                        streak_length = 0
+                else:
+                    # Reset streak if there's no workout on that day
+                    streak_length = 0
 
             # Get a list of all Mondays (start of the week) for the whole year until today
             all_weeks = pd.date_range(start=start_of_year, end=today, freq='W-MON')
