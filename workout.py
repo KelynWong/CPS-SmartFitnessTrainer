@@ -347,25 +347,31 @@ def workout_page():
                 if row['duration'] == 0 and row['calories_burned'] == 0:
                     title = "No workouts :("
                     background_color = "gray"
+                    text_color = "white"
                 elif row['met_duration_goal'] and row['met_calories_goal']:
                     title = "✅ Met both daily workout duration and calorie goals!"
                     background_color = "green"
+                    text_color = "white"
                 elif row['met_duration_goal']:
                     title = "✅ Met daily workout duration goal but ❌ did not meet daily calorie goal."
                     background_color = "yellow"
+                    text_color = "black"
                 elif row['met_calories_goal']:
                     title = "✅ Met daily calorie goal but ❌ did not meet daily workout duration goal."
                     background_color = "yellow"
+                    text_color = "black"
                 else:
                     title = "❌ Did not meet either daily workout or calorie goals."
                     background_color = "red"
+                    text_color = "white"
                 
                 calendar_events.append({
                     "title": title,
                     "start": date,
                     "end": date,
                     "resourceId": "a",  # Assuming a single resource for simplicity
-                    "backgroundColor": background_color  # Set background color for the event
+                    "backgroundColor": background_color,  # Set background color for the event
+                    "textColor": text_color
                 })
 
             
@@ -430,16 +436,19 @@ def workout_page():
                     if frequency_goal and num_workouts >= frequency_goal:
                         weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
                         weekly_background_color = "green"
+                        text_color = "white"
                     else:
                         weekly_title = f"❌ Did not fully meet weekly workout frequency goal. Only {num_workouts} workouts."
                         weekly_background_color = "yellow"
+                        text_color = "black"
                     
                     calendar_events.append({
                         "title": weekly_title,
                         "start": start_of_week.strftime("%Y-%m-%d"),
                         "end": end_of_week.strftime("%Y-%m-%d"),
                         "resourceId": "a",
-                        "backgroundColor": weekly_background_color  # Set background color for the event
+                        "backgroundColor": weekly_background_color,  # Set background color for the event
+                        "textColor": text_color
                     })
                     
                     # Add average workout duration per week
