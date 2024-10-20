@@ -368,19 +368,32 @@ def workout_page():
                     "backgroundColor": background_color  # Set background color for the event
                 })
 
-            # Add workout streak progression to the calendar
-            goal_tracking['day_diff'] = goal_tracking['workout_date'].diff().dt.days.fillna(0)
-            goal_tracking['streak'] = (goal_tracking['day_diff'] == 1).cumsum()
+            
+                # Add workout streak progression to the calendar
+                goal_tracking['worked_out'] = goal_tracking['duration'] > 0
+                goal_tracking['day_diff'] = goal_tracking['workout_date'].diff().dt.days.fillna(0)
+                goal_tracking['is_streak'] = (goal_tracking['day_diff'] == 1) & goal_tracking['worked_out']
 
-            for index, row in goal_tracking.iterrows():
-                if row['streak'] > 1:
-                    calendar_events.append({
-                        "title": f"🔥 Workout streak: {row['streak']} days!",
-                        "start": row['workout_date'].strftime("%Y-%m-%d"),
-                        "end": row['workout_date'].strftime("%Y-%m-%d"),
-                        "resourceId": "a",
-                        "backgroundColor": "orange"
-                    })
+                # Calculate streaks
+                goal_tracking['streak_count'] = (goal_tracking['is_streak']).cumsum()
+                goal_tracking['show_streak'] = (goal_tracking['is_streak'] == False) & goal_tracking['worked_out']
+
+                # Display streaks only on the last day of the streak
+                streak_length = 0
+                for index, row in goal_tracking.iterrows():
+                    if row['worked_out']:
+                        streak_length += 1
+                        # Add streak only on the last day of the streak
+                        if (index == len(goal_tracking) - 1) or (goal_tracking.iloc[index + 1]['worked_out'] == False):
+                            calendar_events.append({
+                                "title": f"🔥 Workout streak: {streak_length} days!",
+                                "start": row['workout_date'].strftime("%Y-%m-%d"),
+                                "end": row['workout_date'].strftime("%Y-%m-%d"),
+                                "resourceId": "a",
+                                "backgroundColor": "orange"
+                            })
+                    else:
+                        streak_length = 0
 
             # Get a list of all Mondays (start of the week) for the whole year until today
             all_weeks = pd.date_range(start=start_of_year, end=today, freq='W-MON')
