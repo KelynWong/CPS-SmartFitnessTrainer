@@ -368,46 +368,89 @@ def workout_page():
                     "backgroundColor": background_color  # Set background color for the event
                 })
 
+            # Add workout streak progression to the calendar
+            goal_tracking['day_diff'] = goal_tracking['workout_date'].diff().dt.days.fillna(0)
+            goal_tracking['streak'] = (goal_tracking['day_diff'] == 1).cumsum()
+
+            for index, row in goal_tracking.iterrows():
+                if row['streak'] > 1:
+                    calendar_events.append({
+                        "title": f"🔥 Workout streak: {row['streak']} days!",
+                        "start": row['workout_date'].strftime("%Y-%m-%d"),
+                        "end": row['workout_date'].strftime("%Y-%m-%d"),
+                        "resourceId": "a",
+                        "backgroundColor": "orange"
+                    })
 
             # Get a list of all Mondays (start of the week) for the whole year until today
             all_weeks = pd.date_range(start=start_of_year, end=today, freq='W-MON')
 
-            # Calculate total workouts per week
+            # Calculate total workouts, average duration, and calories burned per week
             df_workouts['week'] = df_workouts['startDT'].dt.isocalendar().week
             df_workouts['year'] = df_workouts['startDT'].dt.isocalendar().year
 
-            # Group workouts by year and week
-            workouts_per_week = df_workouts.groupby(['year', 'week']).size().reset_index(name='workouts_per_week')
+            weekly_stats = df_workouts.groupby(['year', 'week']).agg({
+                'duration': 'mean',
+                'calories_burned': 'sum',
+                'startDT': 'count'  # Number of workouts per week
+            }).reset_index().rename(columns={'startDT': 'workouts_per_week'})
 
             # Weekly goal tracking for all weeks in the year
             for start_of_week in all_weeks:
                 # Get the year and week number for this Monday
                 year, week = start_of_week.year, start_of_week.isocalendar().week
-                end_of_week = start_of_week + pd.Timedelta(days=7) 
+                end_of_week = start_of_week + pd.Timedelta(days=7)
 
-                # Check if this week has any workouts
-                group = df_workouts[(df_workouts['year'] == year) & (df_workouts['week'] == week)]
-                num_workouts = group.shape[0]
+                # Check if there are workouts for this week
+                week_stats = weekly_stats[(weekly_stats['year'] == year) & (weekly_stats['week'] == week)]
 
-                if num_workouts > 0:
+                if not week_stats.empty:
+                    num_workouts = week_stats['workouts_per_week'].values[0]
+                    avg_duration = week_stats['duration'].values[0]
+                    total_calories = week_stats['calories_burned'].values[0]
+                    
+                    # Check if weekly goals were met
                     if frequency_goal and num_workouts >= frequency_goal:
                         weekly_title = f"✅ Met weekly workout frequency goal with {num_workouts} workouts!"
                         weekly_background_color = "green"
                     else:
                         weekly_title = f"❌ Did not fully meet weekly workout frequency goal. Only {num_workouts} workouts."
                         weekly_background_color = "yellow"
+                    
+                    calendar_events.append({
+                        "title": weekly_title,
+                        "start": start_of_week.strftime("%Y-%m-%d"),
+                        "end": end_of_week.strftime("%Y-%m-%d"),
+                        "resourceId": "a",
+                        "backgroundColor": weekly_background_color  # Set background color for the event
+                    })
+                    
+                    # Add average workout duration per week
+                    calendar_events.append({
+                        "title": f"Avg duration: {avg_duration:.2f} mins",
+                        "start": start_of_week.strftime("%Y-%m-%d"),
+                        "end": end_of_week.strftime("%Y-%m-%d"),
+                        "resourceId": "a",
+                        "backgroundColor": "lightblue"
+                    })
+                    
+                    # Add total calories burned per week
+                    calendar_events.append({
+                        "title": f"Total calories burned: {total_calories:.0f}",
+                        "start": start_of_week.strftime("%Y-%m-%d"),
+                        "end": end_of_week.strftime("%Y-%m-%d"),
+                        "resourceId": "a",
+                        "backgroundColor": "purple"
+                    })
                 else:
-                    weekly_title = "No workouts for this week :("
-                    weekly_background_color = "grey"
-
-                # Add the event to the calendar, stretching it across the week (Monday to Sunday)
-                calendar_events.append({
-                    "title": weekly_title,
-                    "start": start_of_week.strftime("%Y-%m-%d"),
-                    "end": end_of_week.strftime("%Y-%m-%d"),
-                    "resourceId": "a",
-                    "backgroundColor": weekly_background_color  # Set background color for the event
-                })
+                    # No workouts this week
+                    calendar_events.append({
+                        "title": "No workouts for this week :(",
+                        "start": start_of_week.strftime("%Y-%m-%d"),
+                        "end": end_of_week.strftime("%Y-%m-%d"),
+                        "resourceId": "a",
+                        "backgroundColor": "grey"
+                    })
 
             # Calendar options
             calendar_options = {
@@ -486,6 +529,28 @@ def workout_page():
             if weight is not None and age is not None and gender is not None:
                     fig_calories = px.bar(df_workouts, x='workout_date', y='calories_burned', title='Calories Burned per Workout')
                     st.plotly_chart(fig_calories, use_container_width=True)
+
+            st.subheader("Workout Performance Analysis")
+            # Line chart of workout_date vs overallAccuracy, colored by workout_type
+            fig_accuracy = px.line(df_workouts, x='workout_date', y='overallAccuracy', color='workout_type', 
+                                title='Form Accuracy Over Time by Workout Type')
+            st.plotly_chart(fig_accuracy, use_container_width=True)
+
+            # Box plot comparing workout_type against duration, calories_burned, or overallAccuracy
+            fig_comparison = px.box(df_workouts, x='workout_type', y='duration', title='Workout Type vs Duration')
+            st.plotly_chart(fig_comparison, use_container_width=True)
+
+            # You can create similar box plots for calories_burned and overallAccuracy:
+            fig_calories = px.box(df_workouts, x='workout_type', y='calories_burned', title='Workout Type vs Calories Burned')
+            st.plotly_chart(fig_calories, use_container_width=True)
+
+            fig_accuracy_comparison = px.box(df_workouts, x='workout_type', y='overallAccuracy', title='Workout Type vs Accuracy')
+            st.plotly_chart(fig_accuracy_comparison, use_container_width=True)
+
+            # Scatter plot of reps vs duration, colored by workout_type
+            fig_reps_duration = px.scatter(df_workouts, x='reps', y='duration', color='workout_type', 
+                                        title='Reps vs Duration')
+            st.plotly_chart(fig_reps_duration, use_container_width=True)
 
             # Heart rate  
             st.subheader("Heart Rate Analysis")
