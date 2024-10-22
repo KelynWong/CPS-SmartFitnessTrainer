@@ -136,9 +136,7 @@ def workout_page():
             
             # Prepare the payload
             payload = {
-                "username": st.session_state['username'],  # Get username from session state
-                "workout": selected_workout,               # Selected workout from the dropdown
-                "startDT": st.session_state['startDT']     # Start datetime stored in session state
+                "workout": selected_workout.replace(" ", ""), 
             }
 
             # Make the POST request to the server with the workout data
