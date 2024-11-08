@@ -542,8 +542,8 @@ def workout_page():
             st.write(calendar_view)
 
             # Workout and health data visualization
-            st.subheader(f"Raw Workout Data")
-            st.dataframe(df_workouts)
+            st.subheader(f"Workout History Data")
+            st.dataframe(df_workouts[['startDT', 'endDT', 'duration', 'workout', 'reps', 'overallAccuracy', 'avg_heartbeat', 'calories_burned']])
 
             st.subheader("Workout Analysis")
             df_workouts['day_of_week'] = df_workouts['startDT'].dt.day_name()
