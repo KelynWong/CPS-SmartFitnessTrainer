@@ -55,11 +55,11 @@ def profile_page():
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     # Ensure age is treated as an int
-                    age = st.number_input("Age", value=int(user_data.get('age', 0)), min_value=0)
+                    age = st.number_input("Age", value=int(user_data.get('age') or 0), min_value=0)
                 
                 with col2:
                     # Ensure weight is treated as a float
-                    weight = st.number_input("Weight (kg)", value=float(user_data.get('weight', 0.0)), min_value=0.0)
+                    weight = st.number_input("Weight (kg)", value=float(user_data.get('weight') or 0.0), min_value=0.0)
                 
                 with col3:
                     gender = st.selectbox("Gender", options=["Male", "Female"], index=0 if user_data.get('gender') == "Male" else 1)
@@ -79,8 +79,8 @@ def profile_page():
                     # Ensure workout frequency per week is treated as an int
                     workout_frequency = st.number_input("Workout Frequency per Week", value=int(user_data['workoutFrequencyPerWeek']), min_value=0)
 
-            # Submit button for saving changes
-            save_button = st.form_submit_button("Save Changes")
+                # Submit button for saving changes
+                save_button = st.form_submit_button("Save Changes")
 
             if save_button:
                 if uploaded_file is not None:
