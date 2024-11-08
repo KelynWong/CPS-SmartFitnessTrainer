@@ -16,11 +16,9 @@ def login_page():
         create_username_label="Choose a unique username",
         create_password_label="Set your password",
         create_submit_label="Register",
-        create_success_message="Account created successfully!",
         login_username_label="Your username",
         login_password_label="Your password",
         login_submit_label="Log in",
-        login_success_message="Welcome back to Smart Fitness Tracker!",
         login_error_message="Invalid username or password",
     )
 
