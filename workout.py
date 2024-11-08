@@ -52,10 +52,10 @@ def workout_page():
     """, unsafe_allow_html=True)
     
     # Sidebar content with styled links
-    st.sidebar.subheader("Goals")
+
     st.sidebar.markdown('<a href="#overall-goal-tracking" class="sidebar-link">Overall Goal Tracking</a>', unsafe_allow_html=True)
     st.sidebar.markdown('<a href="#goal-tracking-calendar-view" class="sidebar-link">Goal Tracking Calendar</a>', unsafe_allow_html=True)
-    st.sidebar.subheader("Data")
+    
     st.sidebar.markdown('<a href="#raw-workout-data" class="sidebar-link">Raw Workout Data</a>', unsafe_allow_html=True)
     st.sidebar.markdown('<a href="#workout-analysis" class="sidebar-link">Workout Analysis</a>', unsafe_allow_html=True)
     st.sidebar.markdown('<a href="#workout-performance-analysis" class="sidebar-link">Workout Performance Analysis</a>', unsafe_allow_html=True)
