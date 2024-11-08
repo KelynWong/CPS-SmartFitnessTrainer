@@ -69,15 +69,15 @@ def profile_page():
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     # Ensure calories burn value is treated as an int
-                    calories_burn = st.number_input("Calories Burn per Day", value=int(user_data['caloriesBurnPerDay']), min_value=0)
+                    calories_burn = st.number_input("Calories Burn per Day", value=int(user_data.get('caloriesBurnPerDay') or 0), min_value=0)
                 
                 with col2:
                     # Ensure workout duration per day is treated as an int
-                    workout_duration_per_day = st.number_input("Duration per Workout (in minutes)", value=int(user_data['workoutDurationPerDay']), min_value=0)
+                    workout_duration_per_day = st.number_input("Duration per Workout (in minutes)", value=int(user_data.get('workoutDurationPerDay') or 0), min_value=0)
 
                 with col3:
                     # Ensure workout frequency per week is treated as an int
-                    workout_frequency = st.number_input("Workout Frequency per Week", value=int(user_data['workoutFrequencyPerWeek']), min_value=0)
+                    workout_frequency = st.number_input("Workout Frequency per Week", value=int(user_data.get('workoutFrequencyPerWeek') or 0), min_value=0)
 
                 # Submit button for saving changes
                 save_button = st.form_submit_button("Save Changes")
