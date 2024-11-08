@@ -79,8 +79,8 @@ def profile_page():
                     # Ensure workout frequency per week is treated as an int
                     workout_frequency = st.number_input("Workout Frequency per Week", value=int(user_data['workoutFrequencyPerWeek']), min_value=0)
 
-                # Submit button for saving changes
-                save_button = st.form_submit_button("Save Changes")
+            # Submit button for saving changes
+            save_button = st.form_submit_button("Save Changes")
 
             if save_button:
                 if uploaded_file is not None:
