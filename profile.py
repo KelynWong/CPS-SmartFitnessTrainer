@@ -73,7 +73,7 @@ def profile_page():
                 
                 with col2:
                     # Ensure workout duration per day is treated as an int
-                    workout_duration_per_day = st.number_input("Duration per Workout (in minutes)", value=int(user_data.get('workoutDurationPerDay') or 0), min_value=0)
+                    workout_duration_per_day = st.number_input("Duration per Day (in minutes)", value=int(user_data.get('workoutDurationPerDay') or 0), min_value=0)
 
                 with col3:
                     # Ensure workout frequency per week is treated as an int
