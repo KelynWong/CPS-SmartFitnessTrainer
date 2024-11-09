@@ -5,6 +5,7 @@ def login_page():
     # Define the login form
     client = login_form(
         title="Smart Fitness Trainer",
+        icon= ":material/fitness_center:",
         user_tablename="user",
         username_col="username",
         password_col="password",
